@@ -146,4 +146,4 @@ Each subfolder contains its own `README.md` with a service-specific overview and
 
 ---
 
-*Built by Samuel Adams
+Built by Samuel Adams
