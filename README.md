@@ -146,12 +146,4 @@ Each subfolder contains its own `README.md` with a service-specific overview and
 
 ---
 
-## Related Projects
-
-This lab consolidates and supersedes the following standalone lab projects:
-
-- [osTicket Helpdesk Home Lab](https://github.com/sjadams5331/osTicket-Helpdesk-Home-Lab) — Enterprise osTicket deployment with AD/LDAPS integration
-
----
-
-*Built by Sam Adams | Targeting NOC Analyst & Network Engineer roles | Network+ → Security+ → CCNA*
+*Built by Samuel Adams | Network+ → Security+ → CCNA*
