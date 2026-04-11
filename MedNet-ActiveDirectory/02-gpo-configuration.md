@@ -44,7 +44,7 @@ The Default Domain Policy is configured at the domain root and applies to all us
  
 | | |
 |---|---|
-| ![Password Policy](screenshots/02-gpo-configuration.md_01.png) | ![Lockout Policy](screenshots/02-gpo-configuration.md_02.png) |
+| ![Password Policy](../screenshots/02-gpo-configuration.md_01.png) | ![Lockout Policy](../screenshots/02-gpo-configuration.md_02.png) |
  
 ---
  
@@ -68,9 +68,9 @@ The 5-minute screen lock timeout reflects HIPAA's workstation use standards, whi
  
 | | |
 |---|---|
-| ![Clinical Screen Lock](screenshots/02-gpo-configuration.md_03.png) | ![Clinical USB Block](screenshots/02-gpo-configuration.md_04.png) |
+| ![Clinical Screen Lock](../screenshots/02-gpo-configuration.md_03.png) | ![Clinical USB Block](../screenshots/02-gpo-configuration.md_04.png) |
  
-![Clinical Control Panel](screenshots/02-gpo-configuration.md_05.png)
+![Clinical Control Panel](../screenshots/02-gpo-configuration.md_05.png)
  
 ---
  
@@ -93,7 +93,7 @@ The 10-minute screen lock balances security with usability for desk-based admini
  
 | | |
 |---|---|
-| ![Admin Screen Lock](screenshots/02-gpo-configuration.md_06.png) | ![Admin CMD Restriction](screenshots/02-gpo-configuration.md_07.png) |
+| ![Admin Screen Lock](../screenshots/02-gpo-configuration.md_06.png) | ![Admin CMD Restriction](../screenshots/02-gpo-configuration.md_07.png) |
  
 ---
  
@@ -115,11 +115,7 @@ Linked to `Departments/IT`. IT staff are intentionally unrestricted on the user 
  
 Auditing IT accounts is a core principle of privileged access management. Even trusted administrators should have their actions logged — this supports incident response, change tracking, and compliance reporting. These events feed into the Wazuh SIEM deployed in Phase 2.
  
-| | |
-|---|---|
-| ![IT Audit Policy 1](screenshots/02-gpo-configuration.md_08.png) | ![IT Audit Policy 2](screenshots/02-gpo-configuration.md_09.png) |
- 
----
+![IT Audit Policy 1](../screenshots/02-gpo-configuration.md_08.png)
  
 ## GPO #5 — Workstation-Baseline-Policy
  
@@ -144,8 +140,9 @@ Disabling Autorun/Autoplay eliminates a common malware delivery vector (e.g., ma
  
 | | |
 |---|---|
-| ![Workstation Autoplay](screenshots/02-gpo-configuration.md_10.png) | ![Workstation Firewall](screenshots/02-gpo-configuration.md_11.png) |
- 
+| ![Workstation Autoplay](![IT Audit Policy 2](../screenshots/02-gpo-configuration.md_09.png)) | ![Workstation Firewall](../screenshots/02-gpo-configuration.md_11.png) |
+
+![Workstation Autoplay](../screenshots/02-gpo-configuration.md_10.png)
 ---
  
 ## Related Documents
