@@ -67,13 +67,13 @@ mednet.lab
 
 The following screenshot shows the complete OU hierarchy as viewed in Active Directory Users and Computers, with all custom OUs visible alongside the default AD containers.
 
-![AD OU Structure](screenshots/01-domain-design.md_01.png)
+![AD OU Structure](../screenshots/01-domain-design.md_01.png)
 
 ### Populated Department OU — Clinical/Physicians
 
 The following screenshot shows the `Physicians` sub-OU populated with representative user accounts, demonstrating how department OUs are used to organize users by role.
 
-![AD OU Structure](screenshots/01-domain-design.md_02.png)
+![AD Physicians OU](../screenshots/01-domain-design.md_02.png)
 
 ---
 
