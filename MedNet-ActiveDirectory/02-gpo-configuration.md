@@ -140,7 +140,7 @@ Disabling Autorun/Autoplay eliminates a common malware delivery vector (e.g., ma
  
 | | |
 |---|---|
-| ![Workstation Autoplay](![IT Audit Policy 2](../screenshots/02-gpo-configuration.md_09.png)) | ![Workstation Firewall](../screenshots/02-gpo-configuration.md_11.png) |
+| ![Workstation Autoplay](../screenshots/02-gpo-configuration.md_09.png) | ![Workstation Firewall](../screenshots/02-gpo-configuration.md_11.png) |
 
 ![Workstation Autoplay](../screenshots/02-gpo-configuration.md_10.png)
 ---
