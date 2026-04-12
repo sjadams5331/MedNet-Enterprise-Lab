@@ -35,7 +35,7 @@ Policy enforcement was verified via PowerShell and Local Security Policy, confir
  
 | | |
 |---|---|
-| ![Password Policy PowerShell Verification](screenshots/04-security-hardening.md_01.png) | ![Local Security Policy GUI](screenshots/04-security-hardening.md_04.png) |
+| ![Password Policy PowerShell Verification](../screenshots/04-security-hardening.md_01.png) | ![Local Security Policy GUI](../screenshots/04-security-hardening.md_04.png) |
  
 ---
  
@@ -63,7 +63,7 @@ Audit policy is configured via the `IT-Department-Policy` GPO linked to `Departm
  
 Audit policy was verified using `auditpol /get /category:*` confirming active auditing across logon, policy change, and account management categories.
  
-![Audit Policy Verification](screenshots/04-security-hardening.md_02.png)
+![Audit Policy Verification](../screenshots/04-security-hardening.md_02.png)
  
 ---
  
@@ -94,7 +94,7 @@ The Security event log is actively generating audit entries. At the time of docu
  
 The volume and variety of events confirm that audit policy is actively enforcing and logging security-relevant activity across the domain.
  
-![Security Event Log — Active Audit Events](screenshots/04-security-hardening.md_03.png)
+![Security Event Log — Active Audit Events](../screenshots/04-security-hardening.md_03.png)
  
 ---
  
