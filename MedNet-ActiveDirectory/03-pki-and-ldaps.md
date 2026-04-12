@@ -42,7 +42,7 @@ The CA name was explicitly set to `MedNet-RootCA` rather than accepting the auto
  
 Upon successful configuration, Windows automatically issued a domain controller certificate to `WIN-1UKKVRDHPB.mednet.lab`, enabling LDAPS on port 636.
  
-![MedNet-RootCA Certification Authority Console](../screenshots/03-pki-and-ldaps.md.01.png)
+![MedNet-RootCA Certification Authority Console](../screenshots/03-pki-and-ldaps.md_01.png)
  
 ---
  
