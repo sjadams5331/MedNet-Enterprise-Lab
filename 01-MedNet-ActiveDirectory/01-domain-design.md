@@ -123,6 +123,63 @@ Service accounts are placed in the `Service Accounts` OU and follow a `svc-` pre
 
 ---
 
+## Security Groups
+
+All custom security groups are located in `OU=Security Groups,DC=mednet,DC=lab`. Groups follow a `Department-Role` naming convention and are used for RBAC across domain-joined resources including the Samba file server.
+
+### Department Security Groups
+
+| Group Name | Scope | Members | Purpose |
+|---|---|---|---|
+| `Clinical-Physicians` | Global / Security | s.mitchell, j.ortega | Access to `physicians` file share |
+| `Clinical-Nursing` | Global / Security | l.nguyen | Access to `nursing` file share |
+| `Clinical-Pharmacy` | Global / Security | m.evans | Access to `pharmacy` file share |
+| `Admin-HR` | Global / Security | k.booth | Access to `hr` file share |
+| `Admin-Finance` | Global / Security | t.reyes | Access to `finance` file share |
+| `Admin-Reception` | Global / Security | d.cole | Access to `reception` file share |
+| `IT-Staff` | Global / Security | a.turner | Access to `it` file share |
+
+Groups were created using PowerShell on the domain controller:
+
+```powershell
+New-ADGroup -Name "Clinical-Physicians" -GroupScope Global -GroupCategory Security -Path "OU=Security Groups,DC=mednet,DC=lab"
+New-ADGroup -Name "Clinical-Nursing" -GroupScope Global -GroupCategory Security -Path "OU=Security Groups,DC=mednet,DC=lab"
+New-ADGroup -Name "Clinical-Pharmacy" -GroupScope Global -GroupCategory Security -Path "OU=Security Groups,DC=mednet,DC=lab"
+New-ADGroup -Name "Admin-HR" -GroupScope Global -GroupCategory Security -Path "OU=Security Groups,DC=mednet,DC=lab"
+New-ADGroup -Name "Admin-Finance" -GroupScope Global -GroupCategory Security -Path "OU=Security Groups,DC=mednet,DC=lab"
+New-ADGroup -Name "Admin-Reception" -GroupScope Global -GroupCategory Security -Path "OU=Security Groups,DC=mednet,DC=lab"
+New-ADGroup -Name "IT-Staff" -GroupScope Global -GroupCategory Security -Path "OU=Security Groups,DC=mednet,DC=lab"
+```
+
+Users were assigned to their groups:
+
+```powershell
+Add-ADGroupMember -Identity "Clinical-Physicians" -Members "s.mitchell","j.ortega"
+Add-ADGroupMember -Identity "Clinical-Nursing" -Members "l.nguyen"
+Add-ADGroupMember -Identity "Clinical-Pharmacy" -Members "m.evans"
+Add-ADGroupMember -Identity "Admin-HR" -Members "k.booth"
+Add-ADGroupMember -Identity "Admin-Finance" -Members "t.reyes"
+Add-ADGroupMember -Identity "Admin-Reception" -Members "d.cole"
+Add-ADGroupMember -Identity "IT-Staff" -Members "a.turner"
+```
+
+> **Note:** The `Security Groups` OU path is directly under the domain root (`DC=mednet,DC=lab`) rather than nested under `OU=MedNet`. This is because the OU was placed at the domain root level during initial AD setup. In a production environment it would typically sit inside the top-level managed OU.
+
+---
+
+## Domain-Joined Computers
+
+The following computer accounts currently exist in the domain:
+
+| Computer Name | Type | Location | Status |
+|---|---|---|---|
+| `WIN-1UKKKVRD HPB` | Domain Controller | Default `Domain Controllers` OU | Active |
+| `MEDNET-FS01` | File Server (Debian 12 / Samba) | Default `Computers` container | Active — joined during MedNet-FileServer lab |
+
+> **Note:** `MEDNET-FS01` is currently in the default `Computers` container. In a future cleanup pass it will be moved to `Workstations/Servers` to align with the naming and OU structure defined above, and to allow server-scoped GPOs to apply correctly when Phase 3 machine policies are configured.
+
+---
+
 ## GPO Delegation
 
 Each `Departments` sub-OU serves as a natural GPO link point. Department-scoped policy assignments (USB lockdown for Clinical, software restrictions for Administrative, etc.) are covered in detail in [02-gpo-configuration.md](02-gpo-configuration.md).
@@ -138,3 +195,4 @@ The `Workstations` OU split allows machine-level GPOs (screen lock timeout, BitL
 | [02-gpo-configuration.md](02-gpo-configuration.md) | GPO design, settings, and enforcement details |
 | [03-pki-and-ldaps.md](03-pki-and-ldaps.md) | Internal CA setup, certificate deployment, LDAPS configuration |
 | [04-security-hardening.md](04-security-hardening.md) | Account policies, audit configuration, event forwarding |
+| [MedNet-FileServer/03-share-configuration.md](../MedNet-FileServer/03-share-configuration.md) | Samba share structure using these security groups |
