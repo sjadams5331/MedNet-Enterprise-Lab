@@ -145,5 +145,5 @@ Each subfolder contains its own `README.md` with a service-specific overview and
 | Runbook | 📋 Planned |
 
 ---
-
-Built by Samuel Adams
+ 
+LinkedIn: https://www.linkedin.com/in/samuel-j-adams-6a668a307/
