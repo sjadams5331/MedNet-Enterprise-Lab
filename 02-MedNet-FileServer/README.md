@@ -86,3 +86,7 @@ Access to each share is restricted to the corresponding AD security group, enfor
 | [MedNet-Zabbix](../MedNet-Zabbix/) | Network monitoring — file server added as monitored host |
 | [MedNet-Wazuh](../MedNet-Wazuh/) | SIEM — Wazuh agent to be deployed on this VM in Phase 2 |
 | [MedNet-Workstations](../MedNet-Workstations/) | Windows endpoints that will map drives to these shares |
+
+---
+ 
+*Part of the [MedNet Enterprise Lab](../README.md) — Enterprise Healthcare IT Infrastructure & Security Operations Home Lab*
