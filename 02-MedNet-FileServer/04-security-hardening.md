@@ -135,4 +135,3 @@ systemctl restart sshd
 | [01-samba-installation.md](01-samba-installation.md) | Samba installation and base configuration |
 | [02-domain-join.md](02-domain-join.md) | Domain join and Kerberos authentication |
 | [03-share-configuration.md](03-share-configuration.md) | Share structure and AD group permissions |
-| [MedNet-ActiveDirectory/04-security-hardening.md](../MedNet-ActiveDirectory/04-security-hardening.md) | AD-level hardening — account policies, audit configuration |
