@@ -152,6 +152,6 @@ Both services are enabled and set to start automatically on boot.
  
 | Document | Description |
 |---|---|
-| [02-domain-join.md](docs/02-domain-join.md) | Joining the file server to mednet.lab |
+| [02-domain-join.md](02-domain-join.md) | Joining the file server to mednet.lab |
 | [03-share-configuration.md](03-share-configuration.md) | Hospital share structure and smb.conf |
 | [04-security-hardening.md](04-security-hardening.md) | SMB signing, firewall, SSH hardening |
