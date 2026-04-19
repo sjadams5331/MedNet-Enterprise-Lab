@@ -171,10 +171,10 @@ The following computer accounts currently exist in the domain:
 
 | Computer Name | Type | Location | Status |
 |---|---|---|---|
-| `WIN-1UKKKVRD HPB` | Domain Controller | Default `Domain Controllers` OU | Active |
-| `MEDNET-FS01` | File Server (Debian 12 / Samba) | Default `Computers` container | Active — joined during MedNet-FileServer lab |
+| `dc01` | Domain Controller | Default `Domain Controllers` OU | Active |
+| `mednet-fs01` | File Server (Debian 12 / Samba) | Default `Computers` container | Active — joined during MedNet-FileServer lab |
 
-> **Note:** `MEDNET-FS01` is currently in the default `Computers` container. In a future cleanup pass it will be moved to `Workstations/Servers` to align with the naming and OU structure defined above, and to allow server-scoped GPOs to apply correctly when Phase 3 machine policies are configured.
+> **Note:** `mednet-fs01` is currently in the default `Computers` container. In a future cleanup pass it will be moved to `Workstations/Servers` to align with the naming and OU structure defined above, and to allow server-scoped GPOs to apply correctly when Phase 3 machine policies are configured.
 
 ---
 
