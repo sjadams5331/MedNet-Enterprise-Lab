@@ -12,7 +12,7 @@ This document covers the internal Public Key Infrastructure (PKI) setup for the 
 |---|---|
 | CA Name | `MedNet-RootCA` |
 | CA Type | Enterprise Root CA |
-| CA Host | `WIN-1UKKVRDHPB.mednet.lab` |
+| CA Host | `dc01.mednet.lab` |
 | Distinguished Name | `CN=MedNet-RootCA,DC=mednet,DC=lab` |
 | LDAPS Port | 636 |
 | Certificate Format | PEM |
