@@ -14,8 +14,8 @@ Debian 12 was installed in VirtualBox with the following settings:
 |---|---|
 | OS | Debian 12 Bookworm (64-bit) |
 | vCPUs | 2 |
-| RAM | 2 GB |
-| Disk | 53.7 GB |
+| RAM | 4 GB |
+| Disk | 50 GB |
 | Partitioning | Separate `/home`, `/var`, and `/tmp` partitions |
 | Desktop Environment | None (headless server) |
 | Packages Selected | SSH server, standard system utilities only |
