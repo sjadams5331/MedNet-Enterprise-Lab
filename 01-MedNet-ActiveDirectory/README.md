@@ -192,18 +192,5 @@ The following were verified to confirm the environment is functioning as designe
 | [04-security-hardening.md](docs/04-security-hardening.md) | Account policies, audit configuration, event forwarding |
  
 ---
- 
-## Skills Demonstrated
- 
-- Active Directory deployment and domain configuration
-- Organizational Unit design reflecting real-world org structure
-- Group Policy design, linking, and enforcement
-- Internal PKI and Certificate Authority management
-- LDAPS configuration and cross-platform certificate trust
-- Service account management and least-privilege design
-- Security auditing and event log configuration
-- Integration with Linux-based services over LDAPS
- 
----
- 
+
 *Part of the [MedNet Enterprise Lab](../README.md) — Enterprise Healthcare IT Infrastructure & Security Operations Home Lab*
