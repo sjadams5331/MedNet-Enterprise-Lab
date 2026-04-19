@@ -35,24 +35,24 @@ The OU structure mirrors a realistic hospital organizational chart. Users, compu
  
 ```
 mednet.lab
-├── MedNet
-│   ├── Departments
-│   │   ├── Clinical
-│   │   │   ├── Nursing
-│   │   │   ├── Physicians
-│   │   │   └── Radiology
-│   │   ├── Administrative
-│   │   │   ├── HR
-│   │   │   ├── Finance
-│   │   │   └── Reception
-│   │   └── IT
-│   │       ├── HelpDesk
-│   │       └── Infrastructure
-│   ├── Computers
-│   │   ├── Workstations
-│   │   └── Servers
-│   ├── Service Accounts
-│   └── Security Groups
+└── MedNet
+    ├── Departments
+    │   ├── Clinical
+    │   │   ├── Nursing
+    │   │   ├── Physicians
+    │   │   └── Radiology
+    │   ├── Administrative
+    │   │   ├── HR
+    │   │   ├── Finance
+    │   │   └── Reception
+    │   └── IT
+    │       ├── HelpDesk
+    │       └── Infrastructure
+    ├── Computers
+    │   ├── Workstations
+    │   └── Servers
+    ├── Service Accounts
+    └── Security Groups
 ```
  
 ### Security Groups
