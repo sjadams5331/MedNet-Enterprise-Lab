@@ -81,10 +81,10 @@ Access to each share is restricted to the corresponding AD security group, enfor
  
 | Lab | Description |
 |---|---|
-| [MedNet-ActiveDirectory](../MedNet-ActiveDirectory/) | Domain controller, GPOs, PKI, OU structure |
-| [MedNet-Zabbix](../MedNet-Zabbix/) | Network monitoring — file server added as monitored host |
-| [MedNet-Wazuh](../MedNet-Wazuh/) | SIEM — Wazuh agent to be deployed on this VM in Phase 2 |
-| [MedNet-Workstations](../MedNet-Workstations/) | Windows endpoints that will map drives to these shares |
+| [01-samba-installation.md](01-samba-installation.md) | Domain controller, GPOs, PKI, OU structure |
+| [02-domain-join.md](02-domain-join.md) | Network monitoring — file server added as monitored host |
+| [03-share-configuration.md](03-share-configuration.md) | SIEM — Wazuh agent to be deployed on this VM in Phase 2 |
+| [04-security-hardening.md](04-security-hardening.md) | Windows endpoints that will map drives to these shares |
 
 ---
  
