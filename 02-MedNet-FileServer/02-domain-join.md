@@ -144,7 +144,7 @@ net ads info
 | Field | Value |
 |---|---|
 | LDAP server | `192.168.56.10` |
-| LDAP server name | `WIN-1UKKKVRD HPB.mednet.lab` |
+| LDAP server name | `dc01.mednet.lab` |
 | Realm | `MEDNET.LAB` |
 | Bind Path | `dc=MEDNET,dc=LAB` |
 | KDC server | `192.168.56.10` |
