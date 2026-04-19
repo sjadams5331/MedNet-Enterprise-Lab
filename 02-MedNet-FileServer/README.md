@@ -28,7 +28,7 @@ The following must be running and accessible before this lab is built:
  
 | Dependency | Details |
 |---|---|
-| AD Domain Controller | `WIN-1UKKKVRD HPB.mednet.lab` at `192.168.56.10` |
+| AD Domain Controller | `dc01.mednet.lab` at `192.168.56.10` |
 | Domain | `mednet.lab` with functional Kerberos |
 | Internal CA | Available on the AD server for certificate issuance |
 | AD Security Groups | Department groups created in `OU=Security Groups,DC=mednet,DC=lab` |
@@ -44,8 +44,7 @@ MedNet-FileServer/
 ├── 01-samba-installation.md    ← Install, verify, initial config
 ├── 02-domain-join.md           ← Domain join to mednet.lab
 ├── 03-share-configuration.md   ← Hospital share structure, smb.conf, AD permissions
-├── 04-security-hardening.md    ← SMB signing, firewall, SSH hardening
-└── screenshots/
+└── 04-security-hardening.md    ← SMB signing, firewall, SSH hardening 
 ```
  
 ---
