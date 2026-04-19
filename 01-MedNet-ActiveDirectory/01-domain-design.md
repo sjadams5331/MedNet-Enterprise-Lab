@@ -11,12 +11,10 @@ This document covers the Active Directory domain design for the MedNet Enterpris
 | Setting | Value |
 |---|---|
 | Domain Name | `mednet.lab` |
-| Domain Controller | `WIN-1UKKVRDHPB.mednet.lab` |
+| Domain Controller | `dc01` |
 | DC Role | Global Catalog |
 | AD Site | Default-First-Site-Name |
 | Forest/Domain Functional Level | Windows Server 2016+ |
-
-> **Note:** The DC hostname was auto-generated during initial domain promotion. In a production environment this would follow a standardized naming convention such as `DC01-MEDNET` to align with asset management and DNS standards.
 
 ---
 
@@ -26,25 +24,25 @@ The domain uses a single top-level organizational OU (`MedNet`) to separate mana
 
 ```
 mednet.lab
-├── MedNet (top-level OU)
-│   ├── Departments
-│   │   ├── Administrative
-│   │   │   ├── Finance
-│   │   │   ├── HR
-│   │   │   └── Reception
-│   │   ├── Clinical
-│   │   │   ├── Nursing
-│   │   │   ├── Pharmacy
-│   │   │   └── Physicians
-│   │   └── IT
-│   │       ├── Helpdesk
-│   │       └── Systems
-│   ├── Admin Accounts
-│   ├── Security Groups
-│   ├── Service Accounts
-│   └── Workstations
-│       ├── Computers
-│       └── Servers
+└── MedNet (top-level OU)
+    ├── Departments
+    │   ├── Administrative
+    │   │   ├── Finance
+    │   │   ├── HR
+    │   │   └── Reception
+    │   ├── Clinical
+    │   │   ├── Nursing
+    │   │   ├── Pharmacy
+    │   │   └── Physicians
+    │   └── IT
+    │       ├── Helpdesk
+    │       └── Systems
+    ├── Admin Accounts
+    ├── Security Groups
+    ├── Service Accounts
+    └── Workstations
+        ├── Computers
+        └── Servers
 ```
 
 ### OU Design Rationale
@@ -195,4 +193,3 @@ The `Workstations` OU split allows machine-level GPOs (screen lock timeout, BitL
 | [02-gpo-configuration.md](02-gpo-configuration.md) | GPO design, settings, and enforcement details |
 | [03-pki-and-ldaps.md](03-pki-and-ldaps.md) | Internal CA setup, certificate deployment, LDAPS configuration |
 | [04-security-hardening.md](04-security-hardening.md) | Account policies, audit configuration, event forwarding |
-| [MedNet-FileServer/03-share-configuration.md](../MedNet-FileServer/03-share-configuration.md) | Samba share structure using these security groups |
