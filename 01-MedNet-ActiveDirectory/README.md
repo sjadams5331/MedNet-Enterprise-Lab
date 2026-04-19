@@ -35,24 +35,25 @@ The OU structure mirrors a realistic hospital organizational chart. Users, compu
  
 ```
 mednet.lab
-└── MedNet
+└── MedNet (top-level OU)
     ├── Departments
+    │   ├── Administrative
+    │   │   ├── Finance
+    │   │   ├── HR
+    │   │   └── Reception
     │   ├── Clinical
     │   │   ├── Nursing
-    │   │   ├── Physicians
-    │   │   └── Radiology
-    │   ├── Administrative
-    │   │   ├── HR
-    │   │   ├── Finance
-    │   │   └── Reception
+    │   │   ├── Pharmacy
+    │   │   └── Physicians
     │   └── IT
-    │       ├── HelpDesk
-    │       └── Infrastructure
-    ├── Computers
-    │   ├── Workstations
-    │   └── Servers
+    │       ├── Helpdesk
+    │       └── Systems
+    ├── Admin Accounts
+    ├── Security Groups
     ├── Service Accounts
-    └── Security Groups
+    └── Workstations
+        ├── Computers
+        └── Servers
 ```
  
 ### Security Groups
@@ -160,10 +161,10 @@ The domain controller is the dependency anchor for the entire MedNet environment
  
 | Service | Integration |
 |---|---|
-| osTicket (`itsm01.mednet.lab`) | LDAPS user authentication, agent accounts sourced from AD |
-| Zabbix (`mon01.mednet.lab`) | LDAPS authentication for monitoring console access |
-| Wazuh (`siem01.mednet.lab`) | Event log ingestion, agent deployment to domain endpoints |
-| File Server (`fs01.mednet.lab`) | AD-integrated Samba shares, group-based permissions |
+| osTicket (`osticket.mednet.lab`) | LDAPS user authentication, agent accounts sourced from AD |
+| Zabbix (`zabbix.mednet.lab`) | LDAPS authentication for monitoring console access |
+| Wazuh (`wazuh.mednet.lab`) | Event log ingestion, agent deployment to domain endpoints |
+| File Server (`samba.mednet.lab`) | AD-integrated Samba shares, group-based permissions |
 | Workstations | Domain-joined, GPO-managed, Wazuh agent deployed |
  
 ---
