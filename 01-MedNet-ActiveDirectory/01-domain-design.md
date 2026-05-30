@@ -20,39 +20,38 @@ This document covers the Active Directory domain design for the MedNet Enterpris
 
 ## OU Structure
 
-The domain uses a single top-level organizational OU (`MedNet`) to separate managed objects from default AD containers. All user accounts, computer objects, service accounts, and security groups are organized within this hierarchy.
+Custom organizational units are created at the domain root, separate from the default AD containers (`Users`, `Computers`, `Builtin`). This keeps managed objects clearly distinct from the built-in containers and provides clean, scoped link points for Group Policy. All user accounts, computer objects, service accounts, and security groups are organized within this hierarchy.
 
 ```
 mednet.lab
-└── MedNet (top-level OU)
-    ├── Departments
-    │   ├── Administrative
-    │   │   ├── Finance
-    │   │   ├── HR
-    │   │   └── Reception
-    │   ├── Clinical
-    │   │   ├── Nursing
-    │   │   ├── Pharmacy
-    │   │   └── Physicians
-    │   └── IT
-    │       ├── Helpdesk
-    │       └── Systems
-    ├── Admin Accounts
-    ├── Security Groups
-    ├── Service Accounts
-    └── Workstations
-        ├── Computers
-        └── Servers
+├── Admin Accounts
+├── Departments
+│   ├── Administrative
+│   │   ├── Finance
+│   │   ├── HR
+│   │   └── Reception
+│   ├── Clinical
+│   │   ├── Nursing
+│   │   ├── Pharmacy
+│   │   └── Physicians
+│   └── IT
+│       ├── Helpdesk
+│       └── Systems
+├── Security Groups
+├── Service Accounts
+└── Workstations
+    ├── Computers
+    └── Servers
 ```
 
 ### OU Design Rationale
 
 | OU | Purpose |
 |---|---|
-| `Departments` | Contains all standard user accounts, organized by role. Primary GPO link point for department-scoped policies. |
+| `Departments` | Contains all standard user accounts, organized by role. Primary GPO link point for department-scoped user policies. |
 | `Admin Accounts` | Holds privileged accounts (Domain Admins, Helpdesk Admins) separate from standard users — enforces least-privilege separation. |
 | `Security Groups` | Centralized location for all custom security groups used in RBAC and resource access delegation. |
-| `Service Accounts` | Dedicated OU for application service accounts (Zabbix, Wazuh, osTicket). Prevents service accounts from being mixed with user objects. |
+| `Service Accounts` | Dedicated OU for application service accounts (osTicket, Zabbix, Wazuh). Prevents service accounts from being mixed with user objects. |
 | `Workstations` | Holds domain-joined computer objects. Split into `Computers` (endpoints) and `Servers` to allow machine-level GPOs to be scoped appropriately. |
 
 > **Note:** The `Workstations` parent OU was named as such because `Computers` is a reserved default container in Active Directory and cannot be reused as an OU name at the domain root level.
@@ -104,20 +103,20 @@ The following test accounts are distributed across department OUs to simulate a 
 
 ### Computer Objects
 
-| Convention | Format | Example |
+| Type | Format | Example |
 |---|---|---|
 | Workstations | `WS-DEPT-##` | `WS-CLIN-01` |
-| Servers | `SRV-ROLE-##` | `SRV-ZABBIX-01` |
+| Servers | `MEDNET-<ROLE>` | `MEDNET-FS01` |
 
-Computer objects for Phase 3 endpoint VMs will follow this convention and be placed in the appropriate `Workstations/Computers` or `Workstations/Servers` sub-OU upon domain join.
+Workstations use a `WS-DEPT-##` pattern tying each endpoint to its department (`WS-CLIN-01`, `WS-ADMIN-01`, `WS-IT-01`). Servers use a `MEDNET-<ROLE>` pattern identifying their function (`MEDNET-FS01` file server, `MEDNET-NOC` monitoring, `MEDNET-OSTICKET` ITSM, `MEDNET-SIEM01` SIEM). All computer objects are placed in the appropriate `Workstations/Computers` or `Workstations/Servers` sub-OU on domain join.
 
 ### Service Accounts
 
-| Convention | Format | Example |
+| Type | Format | Example |
 |---|---|---|
-| Service Accounts | `svc-appname` | `svc-zabbix` |
+| Service Accounts | `svc_appname` | `svc_osticket` |
 
-Service accounts are placed in the `Service Accounts` OU and follow a `svc-` prefix to distinguish them clearly from standard user accounts in logs and audit reports.
+Service accounts follow a `svc_` prefix to distinguish them clearly from standard user accounts in logs and audit reports, and are placed in the `Service Accounts` OU.
 
 ---
 
@@ -161,28 +160,34 @@ Add-ADGroupMember -Identity "Admin-Reception" -Members "d.cole"
 Add-ADGroupMember -Identity "IT-Staff" -Members "a.turner"
 ```
 
-> **Note:** The `Security Groups` OU path is directly under the domain root (`DC=mednet,DC=lab`) rather than nested under `OU=MedNet`. This is because the OU was placed at the domain root level during initial AD setup. In a production environment it would typically sit inside the top-level managed OU.
+These global security groups are referenced by the domain-local resource permissions on the Samba file server, following standard AD role-based access control practice.
 
 ---
 
 ## Domain-Joined Computers
 
-The following computer accounts currently exist in the domain:
+All lab servers and workstations are joined to the domain and sorted into their appropriate sub-OUs under `Workstations`:
 
-| Computer Name | Type | Location | Status |
+| Computer Name | Role | OU Location | Status |
 |---|---|---|---|
-| `dc01` | Domain Controller | Default `Domain Controllers` OU | Active |
-| `mednet-fs01` | File Server (Debian 12 / Samba) | Default `Computers` container | Active — joined during MedNet-FileServer lab |
+| `dc01` | Domain Controller | `Domain Controllers` | Active |
+| `MEDNET-FS01` | File Server (Debian 12 / Samba) | `Workstations/Servers` | Active |
+| `MEDNET-NOC` | Network Monitoring (Ubuntu Server / Zabbix) | `Workstations/Servers` | Active |
+| `MEDNET-OSTICKET` | ITSM Platform (Debian / osTicket) | `Workstations/Servers` | Active |
+| `MEDNET-SIEM01` | SIEM / HIDS (Rocky Linux 9 / Wazuh) | `Workstations/Servers` | Active |
+| `WS-CLIN-01` | Clinical Workstation (Windows 11 Enterprise) | `Workstations/Computers` | Active |
+| `WS-ADMIN-01` | Administrative Workstation (Windows 10 LTSC 2021) | `Workstations/Computers` | Active |
+| `WS-IT-01` | IT Workstation (Ubuntu 24.04 Desktop) | `Workstations/Computers` | Active |
 
-> **Note:** `mednet-fs01` is currently in the default `Computers` container. In a future cleanup pass it will be moved to `Workstations/Servers` to align with the naming and OU structure defined above, and to allow server-scoped GPOs to apply correctly when Phase 3 machine policies are configured.
+Placing the servers under `Workstations/Servers` (rather than leaving them in the default `Computers` container) is what allows server-scoped and endpoint-scoped machine GPOs to apply correctly, since GPOs cannot be linked to the default `Computers` container.
 
 ---
 
 ## GPO Delegation
 
-Each `Departments` sub-OU serves as a natural GPO link point. Department-scoped policy assignments (USB lockdown for Clinical, software restrictions for Administrative, etc.) are covered in detail in [02-gpo-configuration.md](02-gpo-configuration.md).
+Each `Departments` sub-OU serves as a link point for user-side policy (screen-lock timeouts, Control Panel and command-prompt restrictions). The `Workstations/Computers` OU is the link point for computer-side policy (removable-storage control, Windows Firewall, audit, and event-log settings) that applies to the domain-joined endpoints. Department-scoped and endpoint-scoped policy assignments are covered in detail in [02-gpo-configuration.md](02-gpo-configuration.md).
 
-The `Workstations` OU split allows machine-level GPOs (screen lock timeout, BitLocker enforcement) to be applied to endpoints when Phase 3 Windows VMs are domain-joined, without affecting server objects.
+The `Workstations` split between `Computers` and `Servers` allows machine-level GPOs to be targeted at endpoints without affecting server objects.
 
 ---
 
