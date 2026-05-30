@@ -23,7 +23,7 @@ The Active Directory environment for `mednet.lab` is modeled after a mid-size ho
 | Domain | `mednet.lab` |
 | LDAPS Port | 636 |
 | DNS | Authoritative for `mednet.lab` |
-| Certificate Authority | MedNet Internal CA |
+| Certificate Authority | MedNet-RootCA |
 
 ---
 
@@ -61,13 +61,15 @@ Access to resources across the environment is controlled through AD security gro
 
 | Group | Purpose |
 |---|---|
-| `MedNet-Clinical` | Clinical staff — access to clinical file shares |
-| `MedNet-Administrative` | Admin staff — access to administrative shares |
-| `MedNet-IT` | IT staff — elevated access across systems |
-| `MedNet-HelpDesk` | Help desk agents — osTicket agent access |
-| `MedNet-Management` | Department heads — read access across departments |
-| `MedNet-Workstations` | All domain-joined workstations |
-| `MedNet-Servers` | All domain-joined servers |
+| `Clinical-Physicians` | Physician staff — access to the `physicians` file share |
+| `Clinical-Nursing` | Nursing staff — access to the `nursing` file share |
+| `Clinical-Pharmacy` | Pharmacy staff — access to the `pharmacy` file share |
+| `Admin-HR` | HR staff — access to the `hr` file share |
+| `Admin-Finance` | Finance staff — access to the `finance` file share |
+| `Admin-Reception` | Reception staff — access to the `reception` file share |
+| `IT-Staff` | IT staff — elevated access across systems |
+
+All custom security groups are Global / Security groups located in the `Security Groups` OU and follow a `Department-Role` naming convention. Group creation and membership are documented in [01-domain-design.md](docs/01-domain-design.md).
 
 ---
 
@@ -79,12 +81,13 @@ GPOs are applied at the OU level and scoped to their intended targets. Policies 
 
 | GPO Name | Linked To | Purpose |
 |---|---|---|
-| `MedNet-Password-Policy` | Domain | Password length, complexity, expiration, lockout |
-| `MedNet-Workstation-Hardening` | Workstations OU | Screen lock, USB restriction, audit logging |
-| `MedNet-Drive-Mapping` | Departments OUs | Maps network shares by department via DFS |
-| `MedNet-Software-Restriction` | Clinical OU | Restricts unauthorized software on clinical machines |
-| `MedNet-Audit-Policy` | Domain | Logon events, privilege use, object access auditing |
-| `MedNet-IT-Admin` | IT OU | Grants local admin rights to IT staff on workstations |
+| `Default Domain Policy` | `mednet.lab` (domain root) | Password and account lockout policy for all accounts |
+| `Clinical-Workstation-Policy` | `Departments/Clinical` | User-side: 5-minute screen lock, Control Panel restriction |
+| `Administrative-User-Policy` | `Departments/Administrative` | User-side: 10-minute screen lock, command-prompt restriction |
+| `IT-Department-Policy` | `Workstations/Computers` | Computer-side: endpoint audit policy (logon, account management, policy change) |
+| `Workstation-Baseline-Policy` | `Workstations/Computers` | Computer-side: removable-storage block, Autoplay off, Windows Firewall, event-log sizing |
+
+User-configuration settings are linked to the department OUs that hold the user accounts; Computer-configuration settings are linked to `Workstations/Computers`, which holds the machine objects. This ensures each policy applies to the correct object type. The domain controller's own audit events are captured by the built-in `Default Domain Controllers Policy`. Full settings and rationale are in [02-gpo-configuration.md](docs/02-gpo-configuration.md).
 
 ### Password Policy
 
@@ -101,11 +104,11 @@ GPOs are applied at the OU level and scoped to their intended targets. Policies 
 
 ## Internal PKI / Certificate Authority
 
-An internal Certificate Authority was deployed under the domain to enable LDAPS and support certificate-based trust across services. All services that communicate with Active Directory over LDAPS trust the MedNet Internal CA.
+An internal Certificate Authority was deployed under the domain to enable LDAPS and support certificate-based trust across services. All services that communicate with Active Directory over LDAPS trust the MedNet-RootCA.
 
 | Property | Value |
 |---|---|
-| CA Name | MedNet Internal CA |
+| CA Name | MedNet-RootCA |
 | CA Type | Enterprise Root CA |
 | Certificate issued to | `dc01.mednet.lab` |
 | LDAPS Port | 636 |
@@ -122,9 +125,9 @@ All services that authenticate users against Active Directory do so over LDAPS o
 
 | Account | Used By | Permissions |
 |---|---|---|
-| `svc-osticket@mednet.lab` | osTicket | Read-only directory access |
-| `svc-zabbix@mednet.lab` | Zabbix | Read-only directory access |
-| `svc-wazuh@mednet.lab` | Wazuh | Read-only directory access |
+| `svc_osticket@mednet.lab` | osTicket | Read-only directory access |
+| `svc_zabbix@mednet.lab` | Zabbix | Read-only directory access |
+| `svc_wazuh@mednet.lab` | Wazuh | Read-only directory access |
 
 All service accounts are placed in the `Service Accounts` OU, have passwords set to non-expiring, and are restricted from interactive login via GPO.
 
@@ -176,7 +179,6 @@ The following were verified to confirm the environment is functioning as designe
 - LDAPS connectivity confirmed from all Linux-based service VMs on port 636
 - GPOs applying correctly — verified via `gpresult /r` on workstations
 - Service accounts authenticating successfully from osTicket, Zabbix, and Wazuh
-- Drive mappings applying by department on domain-joined workstations
 - Audit events generating in Security event log and appearing in Wazuh
 
 ---
