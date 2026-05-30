@@ -24,9 +24,9 @@ This lab serves as the capstone portfolio project supporting a career transition
 | ITSM Platform | Debian Linux | osTicket, AD authentication, helpdesk workflows |
 | Network Monitoring | Ubuntu Server | Zabbix, SNMP, alerting, osTicket integration |
 | SIEM / HIDS | Rocky Linux 9 | Wazuh, log aggregation, active response |
-| Workstation (Win 10) | Windows 10 | Domain-joined endpoint, GPO applied, Wazuh agent |
-| Workstation (Win 11) | Windows 11 | Domain-joined endpoint, GPO applied, Wazuh agent |
-| Workstation (Linux) | Ubuntu Desktop | Domain-joined Linux endpoint |
+| Workstation (Clinical) | Windows 11 Enterprise | Domain-joined endpoint, GPO applied, Wazuh agent |
+| Workstation (Administrative) | Windows 10 LTSC 2021 | Domain-joined endpoint, GPO applied, Wazuh agent |
+| Workstation (IT) | Ubuntu Desktop | Domain-joined Linux endpoint |
 | Hypervisor | Oracle VirtualBox | All VMs hosted locally |
 
 **Domain:** `mednet.lab`
@@ -39,26 +39,28 @@ This lab serves as the capstone portfolio project supporting a career transition
 The environment is built around Active Directory as the central identity provider. All services authenticate against the domain, and access to resources is governed by AD groups and GPOs organized around a realistic hospital organizational structure.
 
 ```
-                          ┌─────────────────────┐
-                          │  dc01.mednet.lab     │
-                          │  Active Directory    │
-                          │  DNS | PKI | LDAPS   │
-                          └────────┬────────────┘
-                                   │
-          ┌──────────┬─────────────┼──────────────┬──────────────┐
-          │          │             │              │              │
-    ┌─────┴──┐  ┌────┴───┐  ┌─────┴────┐  ┌──────┴─────┐  ┌────┴──────┐
-    │osTicket│  │Zabbix  │  │ Wazuh    │  │ File Server│  │Workstations│
-    │ITSM    │  │Monitor │  │ SIEM/HIDS│  │ Samba/AD   │  │Win/Linux   │
-    └────────┘  └────────┘  └──────────┘  └────────────┘  └───────────┘
+                             ┌───────────────────┐
+                             │  dc01.mednet.lab  │
+                             │  Active Directory │
+                             │ DNS | PKI | LDAPS │
+                             └─────────┬─────────┘
+                                       │
+       ┌───────────────┬───────────────┼───────────────┬───────────────┐
+       │               │               │               │               │
+┌──────┬─────┐  ┌──────┬─────┐  ┌──────┬─────┐  ┌──────┬─────┐  ┌──────┬─────┐
+│  osTicket  │  │   Zabbix   │  │   Wazuh    │  │ File Server│  │Workstations│
+│    ITSM    │  │  Monitor   │  │ SIEM/HIDS  │  │  Samba/AD  │  │ Win/Linux  │
+└────────────┘  └────────────┘  └────────────┘  └────────────┘  └────────────┘
 ```
 
 Service integrations:
-- Zabbix triggers automatic osTicket tickets on threshold alerts
-- Wazuh agents deployed on all domain-joined endpoints
+- Zabbix automatically opens osTicket tickets on threshold alerts
+- Wazuh agents deployed on all domain-joined endpoints, forwarding events to the SIEM
 - osTicket authenticates users via LDAPS against Active Directory
 - File server permissions enforced through AD security groups
-- Ansible and PowerShell automation handles AD user onboarding/offboarding
+- PowerShell automates the AD identity lifecycle (onboarding, offboarding, access reviews)
+- Ansible enforces Linux baseline configuration and deploys monitoring/SIEM agents across the fleet
+- Python and Bash drive operational health checks, API-driven reporting, and scheduled backups
 
 ---
 
@@ -66,15 +68,14 @@ Service integrations:
 
 ```
 MedNet-Enterprise-Lab/
-├── README.md                        ← You are here
-├── MedNet-ActiveDirectory/          ← AD, GPOs, PKI, OU structure
-├── MedNet-FileServer/               ← Debian Samba, share structure, permissions
-├── MedNet-osTicket/                 ← ITSM platform, AD integration, workflows
-├── MedNet-Zabbix/                   ← Monitoring, SNMP, dashboards, osTicket integration
-├── MedNet-Wazuh/                    ← SIEM, agents, active response, HIPAA rules
-├── MedNet-Workstations/             ← Endpoint configs, GPO applied, Wazuh agents
-├── MedNet-Automation/               ← PowerShell scripts, Ansible playbooks
-└── MedNet-Runbook/                  ← Incident response scenarios, documented workflows
+├── README.md                          ← You are here
+├── 01-MedNet-ActiveDirectory/         ← AD, GPOs, PKI, OU structure
+├── 02-MedNet-FileServer/              ← Debian Samba, share structure, permissions
+├── 03-MedNet-TicketingSystem/         ← ITSM platform, AD integration, workflows
+├── 04-MedNet-NetworkMonitoring/       ← Monitoring, SNMP, dashboards, ticket integration
+├── 05-MedNet-SIEM/                    ← SIEM, agents, active response, HIPAA rules
+├── 06-MedNet-Workstations/            ← Endpoint configs, GPO applied, agents
+└── 07-MedNet-Automation/              ← PowerShell, Ansible, Python/Bash automation
 ```
 
 Each subfolder contains its own `README.md` with a service-specific overview and a `/docs` directory with detailed configuration documentation.
@@ -104,7 +105,7 @@ Each subfolder contains its own `README.md` with a service-specific overview and
 **Networking & Infrastructure**
 - DNS management within an enterprise domain
 - SNMP monitoring and network device integration
-- VLAN-aware monitoring and threshold-based alerting
+- Threshold-based alerting and availability monitoring
 - Samba file services with AD-integrated permissions
 
 **Security Operations**
@@ -120,30 +121,16 @@ Each subfolder contains its own `README.md` with a service-specific overview and
 - Role-based access control for service desk operations
 
 **Automation**
-- PowerShell scripting for AD user lifecycle management
-- Ansible playbooks for configuration management
-- Automated onboarding/offboarding integrated with osTicket
+- AD identity lifecycle management with PowerShell (onboarding, offboarding, access reviews, stale-account auditing)
+- Multi-distro configuration management and agent deployment with Ansible
+- Operational health checks, API-driven reporting, and automated backups with Python and Bash
+- Idempotent, logged, secret-safe automation scheduled via Task Scheduler and systemd timers/cron
 
 **Documentation**
 - Enterprise-grade technical documentation
-- Incident response runbook development
 - Network diagrams and infrastructure mapping
+- Design-decision and validation-focused writing
 
 ---
 
-## Project Status
-
-| Component | Status |
-|---|---|
-| Active Directory | 🔄 In Progress — Rebuilding with updated OU/GPO structure |
-| File Server | 🔄 In Progress — Migrating to Debian/Samba |
-| osTicket | ✅ Complete |
-| Zabbix | ✅ Complete — Enhancements planned |
-| Wazuh | 📋 Planned — Rocky Linux 9 VM |
-| Workstations | 📋 Planned |
-| Automation | 📋 Planned |
-| Runbook | 📋 Planned |
-
----
- 
 LinkedIn: https://www.linkedin.com/in/samuel-j-adams-6a668a307/
