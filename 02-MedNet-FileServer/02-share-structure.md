@@ -116,7 +116,7 @@ The configuration was validated with `testparm`, which parses `smb.conf` and pri
 testparm
 ```
 
-![testparm output showing the four share definitions](../screenshots/02-share-structure_02.png)
+![testparm output showing the four share definitions](../screenshots/02-share-structure.md_02.png)
 
 ### Share visibility
 
@@ -128,7 +128,7 @@ smbclient -L //localhost -U l.nguyen
 
 The output also confirms `SMB1 disabled` — legacy SMB1 is not offered (covered further in [04-security-hardening.md](04-security-hardening.md)).
 
-![smbclient -L listing the four shares as l.nguyen](../screenshots/02-share-structure_03.png)
+![smbclient -L listing the four shares as l.nguyen](../screenshots/02-share-structure.md_03.png)
 
 ---
 
