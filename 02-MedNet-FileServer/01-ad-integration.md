@@ -73,33 +73,43 @@ During installation the Kerberos configuration prompt was answered as follows:
 
 > **Note:** The Kerberos realm is entered in uppercase (`MEDNET.LAB`). This is a Kerberos convention, not a typo — the realm name is case-sensitive and AD presents it uppercase.
 
-![Kerberos realm configuration dialog](../screenshots/01-ad-integration.md_01.png)
+![Kerberos realm configuration dialog](../screenshots/01-ad-integration_01.png)
 
 ---
 
 ## smb.conf — Domain Member Configuration
 
-Before joining, the `[global]` section of `/etc/samba/smb.conf` was configured to operate as an AD domain member. The directives below are the ones that govern AD integration and identity mapping; the SMB transport-hardening directives (signing, minimum protocol, NTLM) are documented in [04-security-hardening.md](04-security-hardening.md).
+Before joining, the `[global]` section of `/etc/samba/smb.conf` was configured to operate as an AD domain member. The directives below govern AD integration and identity mapping; the SMB transport-hardening directives (signing, minimum protocol, NTLM) are added in [04-security-hardening.md](04-security-hardening.md). This is the live configuration as reported by `testparm`:
 
 ```ini
 [global]
-   workgroup = MEDNET
-   realm = MEDNET.LAB
-   server string = MedNet File Server
-   security = ADS
    kerberos method = secrets and keytab
-   log file = /var/log/samba/log.%m
-   max log size = 50
+   realm = MEDNET.LAB
+   security = ADS
+   workgroup = MEDNET
 
+   template homedir = /home/%U
+   template shell = /bin/bash
+
+   winbind enum groups = Yes
+   winbind enum users = Yes
+   winbind refresh tickets = Yes
+   winbind use default domain = Yes
+
+   idmap config mednet : backend = rid
+   idmap config mednet : range = 10000-999999
    idmap config * : backend = tdb
-   idmap config * : range = 10000-99999
-   idmap config MEDNET : backend = ad
-   idmap config MEDNET : range = 100000-999999
+   idmap config * : range = 3000-7999
+
+   map acl inherit = Yes
+   vfs objects = acl_xattr
 ```
 
-> **Note — `security = ADS`:** This tells Samba to operate as a domain member that authenticates against Active Directory, rather than maintaining its own local user database. This single setting was also the fix for an early join failure (see below).
+> **Note — `security = ADS`:** Tells Samba to operate as a domain member that authenticates against Active Directory rather than maintaining its own local user database. This setting was also the fix for an early join failure (see below).
 
-> **Note — `idmap config`:** The `*` (default) domain uses the `tdb` backend for any non-domain SIDs, while the `MEDNET` domain uses the `ad` backend so that UID/GID values are derived consistently from AD itself. Without a correct `idmap config` block, `testparm` reports errors and group resolution does not work. A single-character typo here (`MEDENT` instead of `MEDNET`) produced a persistent, misleading error that took careful line-by-line review to spot — the domain name in these lines must match the `workgroup` exactly.
+> **Note — `idmap config`:** The `mednet` domain uses the `rid` backend, which derives each user's UID/GID algorithmically from the RID portion of their AD SID — no POSIX attributes need to be stored in AD, and the mapping is identical on any server using the same config. (For example, `l.nguyen` resolves to UID `11107`: the range base `10000` plus her account's RID.) The `*` (default) domain uses the `tdb` backend with a lower range for non-domain identities such as `BUILTIN\users`. A single-character typo in the domain name on these lines produces a persistent, misleading error, so the `idmap config <domain>` name must match the `workgroup`.
+
+> **Note — winbind & templates:** `winbind use default domain = Yes` is why AD accounts resolve by bare username (`l.nguyen`) with no `MEDNET\` prefix. `template homedir` and `template shell` set the home path and shell winbind reports for AD users. `map acl inherit` and `vfs objects = acl_xattr` enable storage of fine-grained POSIX ACLs, which the permissions model in [03-permissions-and-acls.md](03-permissions-and-acls.md) depends on.
 
 ---
 
@@ -122,7 +132,7 @@ net ads join -k
 
 > **Why this worked:** `kinit` obtains a Kerberos TGT for the administrator account up front, and `net ads join -k` uses that existing ticket rather than negotiating credentials during the join. This sidesteps the encryption-negotiation failure that broke the other two methods. This same `kinit` + `net ads join -k` approach is the reliable fallback used elsewhere in the lab for joining Linux hosts to the Server 2025 domain.
 
-![Successful domain join output](../screenshots/01-ad-integration.md_02.png)
+![Successful domain join output](../screenshots/01-ad-integration_02.png)
 
 ---
 
@@ -155,15 +165,15 @@ net ads testjoin                  # "Join is OK"
 wbinfo -u | head                  # AD users visible to winbind
 wbinfo -g | grep -i clinical      # the clinical security groups
 getent passwd l.nguyen            # NSS resolves the AD user
-getent group Clinical-Nursing     # NSS resolves the AD group
-id l.nguyen                       # user's group memberships, incl. Clinical-Nursing
+getent group clinical-nursing     # NSS resolves the AD group
+id l.nguyen                       # user's group memberships, incl. clinical-nursing
 ```
 
-> **The critical check is `id l.nguyen`.** Its output must list the user's AD security group (e.g. `Clinical-Nursing`). If the group does not appear here, the corresponding share will deny that user even when the share is configured correctly — making this the first thing to check when troubleshooting access later.
+> **The critical check is `id l.nguyen`.** Its output must list the user's AD security group — here `clinical-nursing` (winbind presents the names lowercased). If the group does not appear, the corresponding share will deny that user even when the share itself is configured correctly, making this the first thing to check when troubleshooting access later.
 
 | | |
 |---|---|
-| ![testparm domain member role](../screenshots/01-ad-integration.md_03.png) | ![id command showing AD group resolution](../screenshots/01-ad-integration.md_04.png) |
+| ![testparm domain member role](../screenshots/01-ad-integration_03.png) | ![id command showing AD group resolution](../screenshots/01-ad-integration_04.png) |
 
 ---
 
