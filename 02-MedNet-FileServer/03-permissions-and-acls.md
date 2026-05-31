@@ -176,7 +176,7 @@ The third operating system, demonstrating the identical boundary on Linux. As Al
 
 ![IT share accessible from the Ubuntu workstation as a.turner](../screenshots/03-permissions-and-acls.md_08.png)
 
-The Clinical share is refused:
+The Clinical share is refused, after pressing connect it loops back to the same log in page without granting the access:
 
 ![Clinical share denied for a.turner on Ubuntu](../screenshots/03-permissions-and-acls.md_09.png)
 
