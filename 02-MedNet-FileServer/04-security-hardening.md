@@ -30,7 +30,7 @@ ntlm auth = no
 
 That SMB1 is refused is also visible in the `smbclient -L` output in [02-share-structure.md](02-share-structure.md), which reports `SMB1 disabled`.
 
-![smb.conf global section showing SMB signing, SMB2 minimum, and NTLM disabled](../screenshots/04-security-hardening.md_01.png)
+![smb.conf global section showing SMB signing, SMB2 minimum, and NTLM disabled](../screenshots/04_02-security-hardening.md_01.png)
 
 ---
 
@@ -77,7 +77,7 @@ The default policy is **deny incoming, allow outgoing** — anything not explici
 
 > **Tightening note:** Because SMB1/NetBIOS is disabled (Part 1), modern SMB rides solely on TCP 445. The NetBIOS ports (137–139) are therefore not strictly required and could be removed — and `nmbd` disabled — to tighten the firewall further, relying on TCP 445 plus AD DNS for name resolution. They are documented here as configured; closing them is a reasonable next-step refinement.
 
-![ufw status verbose showing active firewall and allowed services](../screenshots/04-security-hardening.md_02.png)
+![ufw status verbose showing active firewall and allowed services](../screenshots/04_02-security-hardening.md_02.png)
 
 ---
 
@@ -106,7 +106,7 @@ systemctl status sshd
 
 > **Why:** Disabling root login removes the most-targeted SSH account and enforces accountability — every privileged action is tied to a specific human via their named account rather than the shared, anonymous `root`. This supports the HIPAA audit-control requirement.
 
-![sshd_config showing PermitRootLogin no](../screenshots/04-security-hardening.md_03.png)
+![sshd_config showing PermitRootLogin no](../screenshots/04_02-security-hardening.md_03.png)
 
 ---
 
