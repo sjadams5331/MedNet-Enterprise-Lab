@@ -1,4 +1,4 @@
-# MedNet ITSM — IT Service Desk (osTicket)
+# MedNet — IT Service Desk
 
 ## Purpose
 
