@@ -1,4 +1,4 @@
-# MedNet — IT Service Desk
+# MedNet IT Service Desk
 
 ## Purpose
 
