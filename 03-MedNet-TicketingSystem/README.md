@@ -1,12 +1,12 @@
 # MedNet IT Service Desk
 
-## Purpose
+## Overview
 
 This component provides the centralized IT service desk for the MedNet Health Systems environment. It is the single intake point for IT incidents, service requests, and access requests across the hospital's clinical, administrative, and IT user populations.
 
 The service desk is intentionally positioned as the **operational convergence point** of the lab: monitoring and security telemetry surface here as actionable, auditable tickets, and all support activity is recorded against a tiered workflow with enforced separation of duties.
 
-## Platform Summary
+## Platform Details
 
 | Attribute | Value |
 |---|---|
