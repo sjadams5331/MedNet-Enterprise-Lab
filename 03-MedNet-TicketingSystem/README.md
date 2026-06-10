@@ -132,8 +132,6 @@ In a hospital environment the service desk is a compliance artifact as much as a
 | [06-security-hardening.md](docs/06-security-hardening.md) | TLS on the web UI, install-dir removal, file permissions, scoped MariaDB grants, and SSH/host hardening |
 | [07-backup-and-recovery.md](docs/07-backup-and-recovery.md) | Backup method (database, attachments, config), retention, and tested restore |
 
-*Each document is published as its phase is documented.*
-
 ---
 
 *Part of the [MedNet Enterprise Lab](../README.md) — Enterprise Healthcare IT Infrastructure & Security Operations Home Lab*
