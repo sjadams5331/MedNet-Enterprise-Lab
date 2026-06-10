@@ -1,4 +1,4 @@
-# 01 — AD Integration
+# AD Integration
 
 ## Overview
 
