@@ -1,4 +1,4 @@
-# 03 — Permissions and ACLs
+# Permissions and ACLs
 
 ## Overview
 
