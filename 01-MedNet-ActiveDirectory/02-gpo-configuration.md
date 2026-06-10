@@ -1,4 +1,4 @@
-# 02 — GPO Configuration
+# GPO Configuration
 
 ## Overview
 
