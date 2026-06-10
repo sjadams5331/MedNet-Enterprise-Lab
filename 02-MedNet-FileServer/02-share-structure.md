@@ -1,4 +1,4 @@
-# 02 — Share Structure
+# Share Structure
 
 ## Overview
 
