@@ -1,4 +1,4 @@
-# 03 — PKI and LDAPS
+# PKI and LDAPS
 
 ## Overview
 
