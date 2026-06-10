@@ -1,4 +1,4 @@
-# 01 — Domain Design
+# Domain Design
 
 ## Overview
 
