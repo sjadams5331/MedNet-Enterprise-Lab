@@ -1,4 +1,4 @@
-# 04 — Security Hardening
+# 04 Security Hardening
 
 ## Overview
 
