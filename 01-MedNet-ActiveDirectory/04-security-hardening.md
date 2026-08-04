@@ -6,7 +6,7 @@ This document covers the security hardening configuration for the MedNet Enterpr
 
 ---
 
-## Part 1 — Account Policies
+## Part 1: Account Policies
 
 Account policies are enforced domain-wide via the Default Domain Policy GPO, ensuring all user accounts in `mednet.lab` are subject to the same password and lockout standards regardless of department.
 
@@ -39,7 +39,7 @@ Policy enforcement was verified via PowerShell and Local Security Policy, confir
 
 ---
 
-## Part 2 — Audit Policy
+## Part 2: Audit Policy
 
 Audit policy is configured via the `IT-Department-Policy` GPO linked to `Workstations/Computers`, ensuring logon, account-management, and policy-change activity is logged to the Windows Security event log across all domain-joined endpoints. The domain controller is audited separately by the built-in `Default Domain Controllers Policy`, which is the standard mechanism for DC-level audit. Because audit settings are Computer Configuration, they are linked to the OU that holds the machine objects rather than a user OU, so they apply to the endpoints as intended.
 
@@ -47,17 +47,17 @@ Audit policy is configured via the `IT-Department-Policy` GPO linked to `Worksta
 
 | Category | Setting | Event IDs Generated |
 |---|---|---|
-| Logon / Logoff — Logon | Success and Failure | 4624, 4625 |
-| Logon / Logoff — Logoff | Success | 4634 |
-| Logon / Logoff — Account Lockout | Success | 4740 |
-| Logon / Logoff — Special Logon | Success | 4672 |
-| Policy Change — Audit Policy Change | Success | 4719 |
-| Policy Change — Authentication Policy Change | Success | 4706 |
-| Account Management — User Account Management | Success | 4720, 4722, 4723, 4724, 4725, 4726 |
-| Account Management — Computer Account Management | Success | 4741, 4742, 4743 |
-| Account Management — Security Group Management | Success | 4727, 4728, 4729 |
-| DS Access — Directory Service Access | Success | 4662 |
-| Account Logon — Kerberos Authentication | Success | 4768, 4769 |
+| Logon / Logoff: Logon | Success and Failure | 4624, 4625 |
+| Logon / Logoff: Logoff | Success | 4634 |
+| Logon / Logoff: Account Lockout | Success | 4740 |
+| Logon / Logoff: Special Logon | Success | 4672 |
+| Policy Change: Audit Policy Change | Success | 4719 |
+| Policy Change: Authentication Policy Change | Success | 4706 |
+| Account Management: User Account Management | Success | 4720, 4722, 4723, 4724, 4725, 4726 |
+| Account Management: Computer Account Management | Success | 4741, 4742, 4743 |
+| Account Management: Security Group Management | Success | 4727, 4728, 4729 |
+| DS Access: Directory Service Access | Success | 4662 |
+| Account Logon: Kerberos Authentication | Success | 4768, 4769 |
 
 ### Verification
 
@@ -67,7 +67,7 @@ Audit policy was verified using `auditpol /get /category:*` confirming active au
 
 ---
 
-## Part 3 — Security Event Log
+## Part 3: Security Event Log
 
 ### Event Log Configuration
 
@@ -94,11 +94,11 @@ The Security event log is actively generating audit entries. At the time of docu
 
 The volume and variety of events confirm that audit policy is actively enforcing and logging security-relevant activity across the domain.
 
-![Security Event Log — Active Audit Events](../screenshots/04-security-hardening.md_03.png)
+![Security Event Log showing Active Audit Events](../screenshots/04-security-hardening.md_03.png)
 
 ---
 
-## Part 4 — Hardening Summary
+## Part 4: Hardening Summary
 
 The table below summarizes all security controls implemented across the lab environment, their scope, and the mechanism used to enforce them.
 
@@ -106,27 +106,27 @@ The table below summarizes all security controls implemented across the lab envi
 |---|---|---|
 | Password complexity and length | Domain-wide | Default Domain Policy GPO |
 | Account lockout | Domain-wide | Default Domain Policy GPO |
-| Screen lock — 5 min | Clinical staff | Clinical-Workstation-Policy GPO |
-| Screen lock — 10 min | Administrative staff | Administrative-User-Policy GPO |
+| Screen lock (5 min) | Clinical staff | Clinical-Workstation-Policy GPO |
+| Screen lock (10 min) | Administrative staff | Administrative-User-Policy GPO |
 | Control Panel restricted | Clinical users | Clinical-Workstation-Policy GPO |
 | CMD/PowerShell restricted | Administrative users | Administrative-User-Policy GPO |
 | Removable storage denied | All endpoints | Workstation-Baseline-Policy GPO |
 | Autorun/Autoplay disabled | All endpoints | Workstation-Baseline-Policy GPO |
 | Windows Firewall enforced | All endpoints | Workstation-Baseline-Policy GPO |
 | Event log size enforcement | All endpoints | Workstation-Baseline-Policy GPO |
-| Audit — logon/logoff | All endpoints | IT-Department-Policy GPO |
-| Audit — privilege use | All endpoints | IT-Department-Policy GPO |
-| Audit — policy change | All endpoints | IT-Department-Policy GPO |
-| Audit — account management | All endpoints | IT-Department-Policy GPO |
-| Audit — domain controller | Domain controller | Default Domain Controllers Policy |
+| Audit: logon/logoff | All endpoints | IT-Department-Policy GPO |
+| Audit: privilege use | All endpoints | IT-Department-Policy GPO |
+| Audit: policy change | All endpoints | IT-Department-Policy GPO |
+| Audit: account management | All endpoints | IT-Department-Policy GPO |
+| Audit: domain controller | Domain controller | Default Domain Controllers Policy |
 | LDAPS encryption | Domain controller | AD CS / MedNet-RootCA |
 | Internal PKI | Domain-wide | MedNet-RootCA Enterprise CA |
 
 ---
 
-## Part 5 — SIEM Integration
+## Part 5: SIEM Integration
 
-Security events from the Windows Security log on the domain controller and all domain-joined endpoints are forwarded to the Wazuh SIEM for correlation, alerting, and long-term retention. This adds a SOC layer on top of the native Windows audit infrastructure, turning raw audit events into actionable detection. The DC is treated as a high-priority log source, consistent with production SOC practice. SIEM configuration is documented in the [MedNet-SIEM](../05-MedNet-SIEM/README.md) module.
+Security events from the Windows Security log on the domain controller and all domain-joined endpoints are forwarded to the Wazuh SIEM for correlation, alerting, and long-term retention. This adds a SOC layer on top of the native Windows audit infrastructure, turning raw audit events into actionable detection. The DC is treated as a high-priority log source, consistent with production SOC practice. SIEM configuration is documented in the [MedNet-SIEM](../../06-MedNet-SIEM/README.md) module.
 
 ---
 
@@ -134,8 +134,8 @@ Security events from the Windows Security log on the domain controller and all d
 
 The following hardening measures are planned for later phases of the lab:
 
-- **Fine-Grained Password Policies (PSOs)** — Stricter password policies for the `Admin Accounts` OU (e.g., 16-character minimum, 60-day rotation) using Active Directory Fine-Grained Password Policies.
-- **Endpoint Detection & Response** — Windows Defender alerts from the endpoints ingested by Wazuh to extend coverage beyond Windows audit events into endpoint threat detection.
+- **Fine-Grained Password Policies (PSOs):** Stricter password policies for the `Admin Accounts` OU (e.g., 16-character minimum, 60-day rotation) using Active Directory Fine-Grained Password Policies.
+- **Endpoint Detection & Response:** Windows Defender alerts from the endpoints ingested by Wazuh to extend coverage beyond Windows audit events into endpoint threat detection.
 
 ---
 
@@ -143,6 +143,12 @@ The following hardening measures are planned for later phases of the lab:
 
 | Document | Description |
 |---|---|
+| [README.md](../README.md) | Active Directory module overview and documentation index |
 | [01-domain-design.md](01-domain-design.md) | OU structure, naming conventions, hospital org model |
 | [02-gpo-configuration.md](02-gpo-configuration.md) | GPO design, settings, and enforcement details |
 | [03-pki-and-ldaps.md](03-pki-and-ldaps.md) | Internal CA setup, certificate deployment, LDAPS configuration |
+| [05-domain-joined-workstations.md](05-domain-joined-workstations.md) | Workstation fleet inventory, join process, and centralized authentication verification |
+
+---
+
+*Part of [MedNet Active Directory](../README.md), a module in the [MedNet Enterprise Lab](../../README.md).*
