@@ -18,7 +18,7 @@ This document covers the Active Directory domain design for the MedNet Enterpris
 
 ---
 
-## OU Structure
+## Part 1: OU Structure
 
 Custom organizational units are created at the domain root, separate from the default AD containers (`Users`, `Computers`, `Builtin`). This keeps managed objects clearly distinct from the built-in containers and provides clean, scoped link points for Group Policy. All user accounts, computer objects, service accounts, and security groups are organized within this hierarchy.
 
@@ -49,32 +49,24 @@ mednet.lab
 | OU | Purpose |
 |---|---|
 | `Departments` | Contains all standard user accounts, organized by role. Primary GPO link point for department-scoped user policies. |
-| `Admin Accounts` | Holds privileged accounts (Domain Admins, Helpdesk Admins) separate from standard users — enforces least-privilege separation. |
+| `Admin Accounts` | Holds privileged accounts (Domain Admins, Helpdesk Admins) separate from standard users, enforcing least-privilege separation. |
 | `Security Groups` | Centralized location for all custom security groups used in RBAC and resource access delegation. |
 | `Service Accounts` | Dedicated OU for application service accounts (osTicket, Zabbix, Wazuh). Prevents service accounts from being mixed with user objects. |
 | `Workstations` | Holds domain-joined computer objects. Split into `Computers` (endpoints) and `Servers` to allow machine-level GPOs to be scoped appropriately. |
 
 > **Note:** The `Workstations` parent OU was named as such because `Computers` is a reserved default container in Active Directory and cannot be reused as an OU name at the domain root level.
 
----
+### Verification
 
-## Screenshots
+The complete OU hierarchy and a populated department OU are confirmed in Active Directory Users and Computers.
 
-### Full Domain Structure
-
-The following screenshot shows the complete OU hierarchy as viewed in Active Directory Users and Computers, with all custom OUs visible alongside the default AD containers.
-
-![AD OU Structure](../screenshots/01-domain-design.md_01.png)
-
-### Populated Department OU — Clinical/Physicians
-
-The following screenshot shows the `Physicians` sub-OU populated with representative user accounts, demonstrating how department OUs are used to organize users by role.
-
-![AD Physicians OU](../screenshots/01-domain-design.md_02.png)
+| | |
+|---|---|
+| ![AD OU Structure showing the complete hierarchy with all custom OUs and default AD containers](../screenshots/01-domain-design.md_01.png) | ![AD Physicians OU populated with representative user accounts](../screenshots/01-domain-design.md_02.png) |
 
 ---
 
-## Naming Conventions
+## Part 2: Naming Conventions
 
 ### User Accounts
 
@@ -120,7 +112,7 @@ Service accounts follow a `svc_` prefix to distinguish them clearly from standar
 
 ---
 
-## Security Groups
+## Part 3: Security Groups
 
 All custom security groups are located in `OU=Security Groups,DC=mednet,DC=lab`. Groups follow a `Department-Role` naming convention and are used for RBAC across domain-joined resources including the Samba file server.
 
@@ -164,7 +156,7 @@ These global security groups are referenced by the domain-local resource permiss
 
 ---
 
-## Domain-Joined Computers
+## Part 4: Domain-Joined Computers
 
 All lab servers and workstations are joined to the domain and sorted into their appropriate sub-OUs under `Workstations`:
 
@@ -183,7 +175,7 @@ Placing the servers under `Workstations/Servers` (rather than leaving them in th
 
 ---
 
-## GPO Delegation
+## Part 5: GPO Delegation
 
 Each `Departments` sub-OU serves as a link point for user-side policy (screen-lock timeouts, Control Panel and command-prompt restrictions). The `Workstations/Computers` OU is the link point for computer-side policy (removable-storage control, Windows Firewall, audit, and event-log settings) that applies to the domain-joined endpoints. Department-scoped and endpoint-scoped policy assignments are covered in detail in [02-gpo-configuration.md](02-gpo-configuration.md).
 
@@ -195,6 +187,12 @@ The `Workstations` split between `Computers` and `Servers` allows machine-level 
 
 | Document | Description |
 |---|---|
+| [README.md](../README.md) | Active Directory module overview and documentation index |
 | [02-gpo-configuration.md](02-gpo-configuration.md) | GPO design, settings, and enforcement details |
 | [03-pki-and-ldaps.md](03-pki-and-ldaps.md) | Internal CA setup, certificate deployment, LDAPS configuration |
 | [04-security-hardening.md](04-security-hardening.md) | Account policies, audit configuration, event forwarding |
+| [05-domain-joined-workstations.md](05-domain-joined-workstations.md) | Workstation fleet inventory, join process, and centralized authentication verification |
+
+---
+
+*Part of [MedNet Active Directory](../README.md), a module in the [MedNet Enterprise Lab](../../README.md).*
