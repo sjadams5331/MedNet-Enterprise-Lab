@@ -7,9 +7,9 @@
 
 ## Overview
 
-The Active Directory environment for `mednet.lab` is modeled after a mid-size hospital's IT infrastructure. The organizational structure reflects real departments found in a healthcare setting — clinical, administrative, IT, and management — with security policies and access controls appropriate for each. This is not a basic AD install. Every design decision is intentional and documented.
+The Active Directory environment for `mednet.lab` is modeled after a mid-size hospital's IT infrastructure. The organizational structure reflects real departments found in a healthcare setting: clinical, administrative, IT, and management, each with security policies and access controls appropriate for it. This is not a basic AD install. Every design decision is intentional and documented.
 
-`dc01.mednet.lab` serves as the single domain controller and hosts all core identity services for the lab: DNS, LDAPS, Group Policy, and an internal Certificate Authority. Every other service in the MedNet environment — osTicket, Zabbix, Wazuh, the file server, and all workstations — depends on this server.
+`dc01.mednet.lab` serves as the single domain controller and hosts all core identity services for the lab: DNS, LDAPS, Group Policy, and an internal Certificate Authority. Every other service in the MedNet environment, including osTicket, Zabbix, Wazuh, the file server, and all workstations, depends on this server.
 
 ---
 
@@ -61,13 +61,13 @@ Access to resources across the environment is controlled through AD security gro
 
 | Group | Purpose |
 |---|---|
-| `Clinical-Physicians` | Physician staff — access to the `physicians` file share |
-| `Clinical-Nursing` | Nursing staff — access to the `nursing` file share |
-| `Clinical-Pharmacy` | Pharmacy staff — access to the `pharmacy` file share |
-| `Admin-HR` | HR staff — access to the `hr` file share |
-| `Admin-Finance` | Finance staff — access to the `finance` file share |
-| `Admin-Reception` | Reception staff — access to the `reception` file share |
-| `IT-Staff` | IT staff — elevated access across systems |
+| `Clinical-Physicians` | Physician staff: access to the `physicians` file share |
+| `Clinical-Nursing` | Nursing staff: access to the `nursing` file share |
+| `Clinical-Pharmacy` | Pharmacy staff: access to the `pharmacy` file share |
+| `Admin-HR` | HR staff: access to the `hr` file share |
+| `Admin-Finance` | Finance staff: access to the `finance` file share |
+| `Admin-Reception` | Reception staff: access to the `reception` file share |
+| `IT-Staff` | IT staff: elevated access across systems |
 
 All custom security groups are Global / Security groups located in the `Security Groups` OU and follow a `Department-Role` naming convention. Group creation and membership are documented in [01-domain-design.md](docs/01-domain-design.md).
 
@@ -177,13 +177,13 @@ The following were verified to confirm the environment is functioning as designe
 
 - Domain join successful for all servers and workstations
 - LDAPS connectivity confirmed from all Linux-based service VMs on port 636
-- GPOs applying correctly — verified via `gpresult /r` on workstations
+- GPOs applying correctly, verified via `gpresult /r` on workstations
 - Service accounts authenticating successfully from osTicket, Zabbix, and Wazuh
 - Audit events generating in Security event log and appearing in Wazuh
 
 ---
 
-## Documentation
+## Related Documents
 
 | Document | Description |
 |---|---|
@@ -191,7 +191,8 @@ The following were verified to confirm the environment is functioning as designe
 | [02-gpo-configuration.md](docs/02-gpo-configuration.md) | GPO design, settings, and enforcement details |
 | [03-pki-and-ldaps.md](docs/03-pki-and-ldaps.md) | Internal CA setup, certificate deployment, LDAPS configuration |
 | [04-security-hardening.md](docs/04-security-hardening.md) | Account policies, audit configuration, event forwarding |
+| [05-domain-joined-workstations.md](docs/05-domain-joined-workstations.md) | Workstation fleet inventory, join process, and centralized authentication verification |
 
 ---
 
-*Part of the [MedNet Enterprise Lab](../README.md) — Enterprise Healthcare IT Infrastructure & Security Operations Home Lab*
+*Part of the [MedNet Enterprise Lab](../README.md), an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
