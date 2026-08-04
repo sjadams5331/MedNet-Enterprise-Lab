@@ -20,7 +20,7 @@ This document covers the internal Public Key Infrastructure (PKI) setup for the 
 
 ---
 
-## Part 1 — Active Directory Certificate Services (AD CS)
+## Part 1: Active Directory Certificate Services (AD CS)
 
 ### Role Installation
 
@@ -46,7 +46,7 @@ Upon successful configuration, Windows automatically issued a domain controller 
 
 ---
 
-## Part 2 — LDAPS Configuration
+## Part 2: LDAPS Configuration
 
 ### Verification
 
@@ -65,7 +65,7 @@ The Windows Defender Firewall rule `ADDS-LDAPSEC-TCP-In` (TCP 636) was confirmed
 
 ---
 
-## Part 3 — Certificate Trust Deployment (Linux)
+## Part 3: Certificate Trust Deployment (Linux)
 
 To allow the Debian-based osTicket VM to trust the `MedNet-RootCA` certificate, the CA certificate was exported from the DC and imported into the Linux OS trust store.
 
@@ -74,12 +74,12 @@ To allow the Debian-based osTicket VM to trust the `MedNet-RootCA` certificate, 
 The CA certificate was exported from Windows in PEM format and transferred to the Debian VM via SMB using a temporary share:
 
 ```powershell
-# On Windows DC — create temporary share
+# On Windows DC: create temporary share
 New-SmbShare -Name "CertShare" -Path "C:\Users\Administrator" -FullAccess "Everyone"
 ```
 
 ```bash
-# On Debian osTicket VM — mount share and copy cert
+# On Debian osTicket VM: mount share and copy cert
 mkdir /mnt/certshare
 mount -t cifs //192.168.56.10/CertShare /mnt/certshare -o username=Administrator
 cp /mnt/certshare/mednet-rootca.cer ~/mednet-rootca.cer
@@ -112,7 +112,7 @@ TLS_REQCERT never
 
 ---
 
-## Part 4 — osTicket LDAPS Integration
+## Part 4: osTicket LDAPS Integration
 
 ### Service Account
 
@@ -145,7 +145,7 @@ The osTicket LDAP Authentication and Lookup plugin was configured with the follo
 
 The DC is referenced by IP address rather than hostname so that osTicket's LDAP binds do not depend on name resolution from the osTicket VM.
 
-![osTicket LDAPS Configuration — Instance Updated Successfully](../screenshots/03-pki-and-ldaps.md_02.png)
+![osTicket LDAPS Configuration showing Instance Updated Successfully](../screenshots/03-pki-and-ldaps.md_02.png)
 
 ---
 
@@ -163,6 +163,12 @@ The DC is referenced by IP address rather than hostname so that osTicket's LDAP 
 
 | Document | Description |
 |---|---|
+| [README.md](../README.md) | Active Directory module overview and documentation index |
 | [01-domain-design.md](01-domain-design.md) | OU structure, naming conventions, hospital org model |
 | [02-gpo-configuration.md](02-gpo-configuration.md) | GPO design, settings, and enforcement details |
 | [04-security-hardening.md](04-security-hardening.md) | Account policies, audit configuration, event forwarding |
+| [05-domain-joined-workstations.md](05-domain-joined-workstations.md) | Workstation fleet inventory, join process, and centralized authentication verification |
+
+---
+
+*Part of [MedNet Active Directory](../README.md), a module in the [MedNet Enterprise Lab](../../README.md).*
