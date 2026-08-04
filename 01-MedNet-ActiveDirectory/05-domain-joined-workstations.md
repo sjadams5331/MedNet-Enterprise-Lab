@@ -1,18 +1,18 @@
 # Domain-Joined Workstations
 
-> Three departmental endpoints — clinical, administrative, and IT — joined to `mednet.lab` and authenticating against the domain controller, establishing the workstation fleet that every downstream module is demonstrated against.
+> Three departmental endpoints (clinical, administrative, and IT) joined to `mednet.lab` and authenticating against the domain controller, establishing the workstation fleet that every downstream module is demonstrated against.
 
 ## Overview
 
 A directory service is only as meaningful as the endpoints that consume it. This document records the three workstations provisioned in MedNet and confirms each is a fully joined member of the `mednet.lab` domain, authenticating its assigned persona against `dc01.mednet.lab` and receiving the policies catalogued in [04-security-hardening.md](04-security-hardening.md).
 
-The intent here is scoped deliberately. This module establishes that the fleet **exists**, is **centrally authenticated**, and is **policy-managed** — the prerequisites for everything else in MedNet. The day-to-day activity these endpoints generate (mapped share access on the file server, ticket submission in the helpdesk, monitoring and security-agent check-ins) is demonstrated in the modules that own that telemetry rather than duplicated here. See [Where These Endpoints Appear Next](#where-these-endpoints-appear-next).
+The intent here is scoped deliberately. This module establishes that the fleet **exists**, is **centrally authenticated**, and is **policy-managed**: the prerequisites for everything else in MedNet. The day-to-day activity these endpoints generate (mapped share access on the file server, ticket submission in the helpdesk, monitoring and security-agent check-ins) is demonstrated in the modules that own that telemetry rather than duplicated here. See [Where These Endpoints Appear Next](#where-these-endpoints-appear-next).
 
-The fleet is intentionally mixed — two Windows editions and one Linux desktop — mirroring how a real mid-size hospital runs a heterogeneous estate. Central authentication against a single directory, regardless of operating system, is the control that satisfies HIPAA's information-access-management and audit-controls expectations: every login on every platform resolves to a named domain identity and is recorded on the domain controller.
+The fleet is intentionally mixed, with two Windows editions and one Linux desktop, mirroring how a real mid-size hospital runs a heterogeneous estate. Central authentication against a single directory, regardless of operating system, is the control that satisfies HIPAA's information-access-management and audit-controls expectations: every login on every platform resolves to a named domain identity and is recorded on the domain controller.
 
 ---
 
-## Part 1 — Endpoint Inventory
+## Part 1: Endpoint Inventory
 
 | Hostname | Operating System | Persona | Department / OU | Host-Only IP |
 |---|---|---|---|---|
@@ -26,9 +26,9 @@ All three reside on the host-only network (`vboxnet0`, `192.168.56.0/24`) with a
 
 | Endpoint | Choice | Why |
 |---|---|---|
-| `WS-CLIN-01` | Windows 11 Enterprise | Clinical floors need a current, fully supported OS with ongoing patching and modern hardware compatibility — the realistic baseline for active patient-facing endpoints. |
+| `WS-CLIN-01` | Windows 11 Enterprise | Clinical floors need a current, fully supported OS with ongoing patching and modern hardware compatibility: the realistic baseline for active patient-facing endpoints. |
 | `WS-ADMIN-01` | Windows 10 LTSC 2021 | Administrative departments (billing, records, front desk) routinely run LTSC builds, where fixed-function legacy applications favor stability over feature churn. Including LTSC demonstrates an understanding of *why* real healthcare fleets are mixed rather than uniformly current. |
-| `WS-IT-01` | Ubuntu 24.04 LTS Desktop | The IT engineering bench — scripting, SSH, and troubleshooting. Joining a Linux desktop to AD demonstrates the most transferable identity-management skill of the three and reflects how an IT staffer realistically works. |
+| `WS-IT-01` | Ubuntu 24.04 LTS Desktop | The IT engineering bench: scripting, SSH, and troubleshooting. Joining a Linux desktop to AD demonstrates the most transferable identity-management skill of the three and reflects how an IT staffer realistically works. |
 
 ### Verification
 
@@ -40,7 +40,7 @@ The departmental OU layout and the three pre-staged computer objects are confirm
 
 ---
 
-## Part 2 — Pre-Join Preparation
+## Part 2: Pre-Join Preparation
 
 All three endpoints share a common baseline before any join is attempted. In a dual-adapter VirtualBox environment this preparation is the source of nearly every avoidable join failure.
 
@@ -56,7 +56,7 @@ New-ADComputer -Name "WS-IT-01"    -Path "OU=IT,OU=Workstations,OU=MedNet,DC=med
 
 ### Network and DNS Baseline
 
-Every VM carries two adapters — a NAT adapter for internet access and a host-only adapter (`vboxnet0`) for internal lab traffic. DNS must be pinned carefully or the NAT adapter registers competing records in `mednet.lab` and causes intermittent, round-robin resolution failures. The following baseline is applied to all three endpoints:
+Every VM carries two adapters: a NAT adapter for internet access and a host-only adapter (`vboxnet0`) for internal lab traffic. DNS must be pinned carefully or the NAT adapter registers competing records in `mednet.lab` and causes intermittent, round-robin resolution failures. The following baseline is applied to all three endpoints:
 
 | Setting | Configured Value | Rationale |
 |---|---|---|
@@ -70,7 +70,7 @@ Every VM carries two adapters — a NAT adapter for internet access and a host-o
 Each machine is renamed to exactly match its pre-staged AD object before joining. On Windows this happens after OOBE; on Ubuntu it is set during installation. Joining with a mismatched name creates a second, orphaned object in the default container while the pre-staged object sits unused.
 
 ```powershell
-# Windows — elevated prompt, after OOBE and before domain join
+# Windows: elevated prompt, after OOBE and before domain join
 Rename-Computer -NewName "WS-CLIN-01" -Restart
 ```
 
@@ -84,7 +84,7 @@ Pre-flight resolution and adapter state are confirmed before joining: a clean `i
 
 ---
 
-## Part 3 — Windows Workstation Join
+## Part 3: Windows Workstation Join
 
 `WS-CLIN-01` and `WS-ADMIN-01` follow an identical sequence; only the hostname, IP, and persona user differ.
 
@@ -122,13 +122,13 @@ For `WS-CLIN-01` (`l.nguyen`), the applied set includes `Default Domain Policy`,
 
 ---
 
-## Part 4 — Linux Workstation Join (WS-IT-01)
+## Part 4: Linux Workstation Join (WS-IT-01)
 
 Joining an Ubuntu desktop to AD is the most involved of the three and demonstrates the most transferable Linux identity skill. The endpoint authenticates the same domain users against the same DC, with login presented at the GNOME (GDM) screen.
 
 ### Why `net ads join` instead of `realm join`
 
-The standard `realm join` path failed against Windows Server 2025. `adcli` negotiated a DES encryption type that the modern DC rejected, surfacing as a `Message stream modified` Kerberos error; a follow-up `realm join --membership-software=samba` then failed on Kerberos FAST armoring. Documenting the failure path matters here — it reflects a real interoperability quirk between current Ubuntu tooling and Server 2025, and the working solution is a deliberate Samba-based join rather than the textbook one-liner.
+The standard `realm join` path failed against Windows Server 2025. `adcli` negotiated a DES encryption type that the modern DC rejected, surfacing as a `Message stream modified` Kerberos error; a follow-up `realm join --membership-software=samba` then failed on Kerberos FAST armoring. Documenting the failure path matters here: it reflects a real interoperability quirk between current Ubuntu tooling and Server 2025, and the working solution is a deliberate Samba-based join rather than the textbook one-liner.
 
 ### Working Join Path
 
@@ -174,9 +174,9 @@ The join is confirmed by resolving a domain user through NSS and checking group 
 
 ---
 
-## Part 5 — Centralized Authentication
+## Part 5: Centralized Authentication
 
-The point of the fleet is a single source of truth for identity. With all three endpoints joined, every interactive login — Windows or Linux — produces a `Logon` event (Event ID `4624`) in the domain controller's Security log, attributable to a named domain account. This is the audit-trail foundation that the SIEM module later builds detection content on top of.
+The point of the fleet is a single source of truth for identity. With all three endpoints joined, every interactive login, whether Windows or Linux, produces a `Logon` event (Event ID `4624`) in the domain controller's Security log, attributable to a named domain account. This is the audit-trail foundation that the SIEM module later builds detection content on top of.
 
 | | |
 |---|---|
@@ -201,6 +201,12 @@ These workstations are the actors for the rest of MedNet. Their provisioning is 
 
 | Document | Description |
 |---|---|
-| [01-domain-design.md](01-domain-design.md) | Domain, OU, and naming-convention design that these endpoints conform to. |
-| [04-security-hardening.md](04-security-hardening.md) | The GPO and account-hardening controls enforced on the joined fleet. |
-| [README.md](../README.md) | Active Directory module overview and documentation index. |
+| [README.md](../README.md) | Active Directory module overview and documentation index |
+| [01-domain-design.md](01-domain-design.md) | OU structure, naming conventions, hospital org model |
+| [02-gpo-configuration.md](02-gpo-configuration.md) | GPO design, settings, and enforcement details |
+| [03-pki-and-ldaps.md](03-pki-and-ldaps.md) | Internal CA setup, certificate deployment, LDAPS configuration |
+| [04-security-hardening.md](04-security-hardening.md) | Account policies, audit configuration, event forwarding |
+
+---
+
+*Part of [MedNet Active Directory](../README.md), a module in the [MedNet Enterprise Lab](../../README.md).*
