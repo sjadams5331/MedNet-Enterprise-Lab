@@ -184,6 +184,8 @@ id l.nguyen                       # user's group memberships, incl. clinical-nur
 | [02-share-structure.md](02-share-structure.md) | Hospital share layout, on-disk structure, and `smb.conf` share definitions |
 | [03-permissions-and-acls.md](03-permissions-and-acls.md) | AD group-to-share mapping, POSIX ACLs, and access control |
 | [04-security-hardening.md](04-security-hardening.md) | SMB signing, protocol hardening, firewall, and SSH hardening |
+| [05-backup-and-recovery.md](docs/05-backup-and-recovery.md) | Backup method, retention, and a tested restore |
+| [06-storage-and-quotas.md](docs/06-storage-and-quotas.md) | LVM storage layout and per-department disk quotas |
 | [MedNet-ActiveDirectory/01-domain-design.md](../../01-MedNet-ActiveDirectory/docs/01-domain-design.md) | AD OU structure, security groups, and user accounts |
 
 ---
