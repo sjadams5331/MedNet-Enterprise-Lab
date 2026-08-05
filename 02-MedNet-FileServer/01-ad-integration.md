@@ -96,7 +96,13 @@ Before joining, the `[global]` section of `/etc/samba/smb.conf` was configured t
    winbind refresh tickets = Yes
    winbind use default domain = Yes
 
-   idmap config mednet : backend = rid
+   idmap config mednet : backend = rid| [01-ad-integration.md](docs/01-ad-integration.md) | Domain join, Kerberos authentication, and AD identity resolution |
+| [02-share-structure.md](docs/02-share-structure.md) | Share layout, on-disk structure, and `smb.conf` share definitions |
+| [03-permissions-and-acls.md](docs/03-permissions-and-acls.md) | POSIX ACLs, group-based read/write control, and the cross-OS access demonstration |
+| [04-security-hardening.md](docs/04-security-hardening.md) | SMB signing, protocol hardening, firewall, and SSH hardening |
+| [05-backup-and-recovery.md](docs/05-backup-and-recovery.md) | Backup method, retention, and a tested restore |
+| [06-storage-and-quotas.md](docs/06-storage-and-quotas.md) | LVM storage layout and per-department disk quotas |
+| [MedNet-ActiveDirectory/01-domain-design.md](../../01-MedNet-ActiveDirectory/docs/01-domain-design.md) | AD OU structure, security groups, and user accounts |
    idmap config mednet : range = 10000-999999
    idmap config * : backend = tdb
    idmap config * : range = 3000-7999
@@ -181,12 +187,12 @@ id l.nguyen                       # user's group memberships, incl. clinical-nur
 
 | Document | Description |
 |---|---|
+| [README.md](../README.md) | File Server module overview and documentation index |
 | [02-share-structure.md](02-share-structure.md) | Hospital share layout, on-disk structure, and `smb.conf` share definitions |
 | [03-permissions-and-acls.md](03-permissions-and-acls.md) | AD group-to-share mapping, POSIX ACLs, and access control |
 | [04-security-hardening.md](04-security-hardening.md) | SMB signing, protocol hardening, firewall, and SSH hardening |
 | [05-backup-and-recovery.md](docs/05-backup-and-recovery.md) | Backup method, retention, and a tested restore |
 | [06-storage-and-quotas.md](docs/06-storage-and-quotas.md) | LVM storage layout and per-department disk quotas |
-| [MedNet-ActiveDirectory/01-domain-design.md](../../01-MedNet-ActiveDirectory/docs/01-domain-design.md) | AD OU structure, security groups, and user accounts |
 
 ---
 
