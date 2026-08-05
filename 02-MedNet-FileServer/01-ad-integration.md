@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document covers how `mednet-fs01` was joined to the `mednet.lab` Active Directory domain and configured to authenticate users and resolve groups against AD. As a domain member, the file server uses the same Kerberos infrastructure as the domain-joined Windows machines — staff access shares with their existing AD identities, and no separate local accounts are maintained on the server.
+This document covers how `mednet-fs01` was joined to the `mednet.lab` Active Directory domain and configured to authenticate users and resolve groups against AD. As a domain member, the file server uses the same Kerberos infrastructure as the domain-joined Windows machines: staff access shares with their existing AD identities, and no separate local accounts are maintained on the server.
 
 This AD integration is the foundation the rest of the module is built on: the hospital share structure ([02-share-structure.md](02-share-structure.md)) and the AD group-based permissions ([03-permissions-and-acls.md](03-permissions-and-acls.md)) both depend on the server being able to resolve AD users and their group memberships. The server participates as a standard domain member, **not** a domain controller.
 
@@ -14,10 +14,10 @@ The file server uses two complementary AD protocols, each handling a distinct jo
 
 | Protocol | Role |
 |---|---|
-| **Kerberos** | Interactive authentication — users access shares using AD tickets; on domain-joined clients no password is re-entered |
-| **LDAP** | Directory lookups — resolving AD user and group information so share permissions can be enforced |
+| **Kerberos** | Interactive authentication: users access shares using AD tickets; on domain-joined clients no password is re-entered |
+| **LDAP** | Directory lookups: resolving AD user and group information so share permissions can be enforced |
 
-This is the same Kerberos infrastructure the domain-joined Windows endpoints use. Authentication happens on the file server (which is domain-joined), so a client does not itself need to be domain-joined to be authenticated against AD — it only changes whether the experience is single-sign-on or credential-prompted.
+This is the same Kerberos infrastructure the domain-joined Windows endpoints use. Authentication happens on the file server (which is domain-joined), so a client does not itself need to be domain-joined to be authenticated against AD; it only changes whether the experience is single-sign-on or credential-prompted.
 
 ---
 
@@ -57,7 +57,7 @@ apt install realmd sssd sssd-tools adcli krb5-user packagekit samba-common-bin -
 | Package | Purpose |
 |---|---|
 | `realmd` | Domain discovery and join orchestration |
-| `sssd` / `sssd-tools` | System Security Services Daemon and utilities — AD authentication |
+| `sssd` / `sssd-tools` | System Security Services Daemon and utilities for AD authentication |
 | `adcli` | Active Directory command-line interface |
 | `krb5-user` | Kerberos client utilities (`kinit`, `klist`) |
 | `packagekit` | Dependency required by `realmd` |
@@ -71,13 +71,13 @@ During installation the Kerberos configuration prompt was answered as follows:
 | Kerberos server | `192.168.56.10` |
 | Administrative server | `192.168.56.10` |
 
-> **Note:** The Kerberos realm is entered in uppercase (`MEDNET.LAB`). This is a Kerberos convention, not a typo — the realm name is case-sensitive and AD presents it uppercase.
+> **Note:** The Kerberos realm is entered in uppercase (`MEDNET.LAB`). This is a Kerberos convention, not a typo: the realm name is case-sensitive and AD presents it uppercase.
 
 ![Kerberos realm configuration dialog](../screenshots/01-ad-integration_01.png)
 
 ---
 
-## smb.conf — Domain Member Configuration
+## smb.conf: Domain Member Configuration
 
 Before joining, the `[global]` section of `/etc/samba/smb.conf` was configured to operate as an AD domain member. The directives below govern AD integration and identity mapping; the SMB transport-hardening directives (signing, minimum protocol, NTLM) are added in [04-security-hardening.md](04-security-hardening.md). This is the live configuration as reported by `testparm`:
 
@@ -105,11 +105,11 @@ Before joining, the `[global]` section of `/etc/samba/smb.conf` was configured t
    vfs objects = acl_xattr
 ```
 
-> **Note — `security = ADS`:** Tells Samba to operate as a domain member that authenticates against Active Directory rather than maintaining its own local user database. This setting was also the fix for an early join failure (see below).
+> **Note:** Setting `security = ADS` tells Samba to operate as a domain member that authenticates against Active Directory rather than maintaining its own local user database. This setting was also the fix for an early join failure (see below).
 
-> **Note — `idmap config`:** The `mednet` domain uses the `rid` backend, which derives each user's UID/GID algorithmically from the RID portion of their AD SID — no POSIX attributes need to be stored in AD, and the mapping is identical on any server using the same config. (For example, `l.nguyen` resolves to UID `11107`: the range base `10000` plus her account's RID.) The `*` (default) domain uses the `tdb` backend with a lower range for non-domain identities such as `BUILTIN\users`. A single-character typo in the domain name on these lines produces a persistent, misleading error, so the `idmap config <domain>` name must match the `workgroup`.
+> **Note:** The `idmap config` lines control how AD identities map to Linux UID/GIDs. The `mednet` domain uses the `rid` backend, which derives each user's UID/GID algorithmically from the RID portion of their AD SID, so no POSIX attributes need to be stored in AD and the mapping is identical on any server using the same config. (For example, `l.nguyen` resolves to UID `11107`: the range base `10000` plus her account's RID.) The `*` (default) domain uses the `tdb` backend with a lower range for non-domain identities such as `BUILTIN\users`. A single-character typo in the domain name on these lines produces a persistent, misleading error, so the `idmap config <domain>` name must match the `workgroup`.
 
-> **Note — winbind & templates:** `winbind use default domain = Yes` is why AD accounts resolve by bare username (`l.nguyen`) with no `MEDNET\` prefix. `template homedir` and `template shell` set the home path and shell winbind reports for AD users. `map acl inherit` and `vfs objects = acl_xattr` enable storage of fine-grained POSIX ACLs, which the permissions model in [03-permissions-and-acls.md](03-permissions-and-acls.md) depends on.
+> **Note:** `winbind use default domain = Yes` is why AD accounts resolve by bare username (`l.nguyen`) with no `MEDNET\` prefix. `template homedir` and `template shell` set the home path and shell winbind reports for AD users. `map acl inherit` and `vfs objects = acl_xattr` enable storage of fine-grained POSIX ACLs, which the permissions model in [03-permissions-and-acls.md](03-permissions-and-acls.md) depends on.
 
 ---
 
@@ -117,13 +117,13 @@ Before joining, the `[global]` section of `/etc/samba/smb.conf` was configured t
 
 The join was not straightforward, and the path to success is worth preserving because the failures are common and the error messages are misleading.
 
-**Attempt 1 — `realm join`** failed with a Kerberos encryption negotiation error (`Couldn't set password for computer account: Message stream modified`). This initially looked like a time-sync problem but was not — it was the encryption types being negotiated for the computer account password.
+**Attempt 1: `realm join`** failed with a Kerberos encryption negotiation error (`Couldn't set password for computer account: Message stream modified`). This initially looked like a time-sync problem but was not; it was the encryption types being negotiated for the computer account password.
 
-**Attempt 2 — `net ads join`** failed with `This operation is only allowed for the PDC`. This was resolved by correcting `smb.conf` to use `security = ADS` (above).
+**Attempt 2: `net ads join`** failed with `This operation is only allowed for the PDC`. This was resolved by correcting `smb.conf` to use `security = ADS` (above).
 
-**Attempt 3 — `net ads join`** then failed with `No logon servers available`, despite ports `135`, `389`, and `445` all being open and DC services confirmed running.
+**Attempt 3: `net ads join`** then failed with `No logon servers available`, despite ports `135`, `389`, and `445` all being open and DC services confirmed running.
 
-**Working solution** — pre-authenticate as the domain administrator to obtain a Kerberos ticket, then join using that ticket:
+**Working solution:** pre-authenticate as the domain administrator to obtain a Kerberos ticket, then join using that ticket:
 
 ```bash
 kinit Administrator@MEDNET.LAB
@@ -140,7 +140,7 @@ net ads join -k
 
 After joining, the configuration and AD integration were verified.
 
-**Configuration check** — `testparm` confirmed a valid config and domain-member role:
+**Configuration check:** `testparm` confirmed a valid config and domain-member role:
 
 ```bash
 testparm
@@ -158,7 +158,7 @@ systemctl restart smbd nmbd
 systemctl status smbd
 ```
 
-**Join and identity resolution** — these confirm the server can not only see the domain but resolve AD users *and their group memberships*, which is what share permissions depend on:
+**Join and identity resolution:** these confirm the server can not only see the domain but resolve AD users *and their group memberships*, which is what share permissions depend on:
 
 ```bash
 net ads testjoin                  # "Join is OK"
@@ -169,7 +169,7 @@ getent group clinical-nursing     # NSS resolves the AD group
 id l.nguyen                       # user's group memberships, incl. clinical-nursing
 ```
 
-> **The critical check is `id l.nguyen`.** Its output must list the user's AD security group — here `clinical-nursing` (winbind presents the names lowercased). If the group does not appear, the corresponding share will deny that user even when the share itself is configured correctly, making this the first thing to check when troubleshooting access later.
+> **The critical check is `id l.nguyen`.** Its output must list the user's AD security group, here `clinical-nursing` (winbind presents the names lowercased). If the group does not appear, the corresponding share will deny that user even when the share itself is configured correctly, making this the first thing to check when troubleshooting access later.
 
 | | |
 |---|---|
@@ -185,3 +185,7 @@ id l.nguyen                       # user's group memberships, incl. clinical-nur
 | [03-permissions-and-acls.md](03-permissions-and-acls.md) | AD group-to-share mapping, POSIX ACLs, and access control |
 | [04-security-hardening.md](04-security-hardening.md) | SMB signing, protocol hardening, firewall, and SSH hardening |
 | [MedNet-ActiveDirectory/01-domain-design.md](../../01-MedNet-ActiveDirectory/docs/01-domain-design.md) | AD OU structure, security groups, and user accounts |
+
+---
+
+*Part of the [MedNet Enterprise Lab](../README.md), an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
