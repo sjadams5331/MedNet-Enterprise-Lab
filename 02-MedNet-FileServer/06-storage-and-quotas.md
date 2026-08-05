@@ -4,19 +4,19 @@
 
 This document covers how `mednet-fs01` manages the storage underlying the hospital share structure: the LVM-based volume that replaced the original ad-hoc placement of share data, and the per-department disk quotas layered on top of it.
 
-Where `05-backup-and-recovery.md` covers *recovering* data, this document covers *managing the space that data lives on* — ensuring the share structure sits on a volume that can grow as the hospital's storage needs grow, and that no single department can silently consume the entire disk at the expense of every other department sharing it.
+Where `05-backup-and-recovery.md` covers *recovering* data, this document covers *managing the space that data lives on*: ensuring the share structure sits on a volume that can grow as the hospital's storage needs grow, and that no single department can silently consume the entire disk at the expense of every other department sharing it.
 
 ---
 
-## Storage Layout — LVM on a Dedicated Data Disk
+## Storage Layout: LVM on a Dedicated Data Disk
 
 ### Why LVM
 
-A plain partition works until it doesn't — the moment a department outgrows its allocation, a fixed partition means downtime, a full backup/restore cycle, or both. LVM decouples the logical volume from the physical disk boundary, so storage can be extended live, with the filesystem mounted and Samba running, as demonstrated later in this document.
+A plain partition works until it doesn't: the moment a department outgrows its allocation, a fixed partition means downtime, a full backup/restore cycle, or both. LVM decouples the logical volume from the physical disk boundary, so storage can be extended live, with the filesystem mounted and Samba running, as demonstrated later in this document.
 
-`mednet-fs01` already had a disk provisioned for exactly this purpose — `mednet-fs01-data.vdi`, 20 GB, attached at `SATA Port 1` — from earlier in the build. It had gone unused while other modules were prioritized; the share data was, in the meantime, living directly on the OS root filesystem. This section closes that gap.
+`mednet-fs01` already had a disk provisioned for exactly this purpose (`mednet-fs01-data.vdi`, 20 GB, attached at `SATA Port 1`) from earlier in the build. It had gone unused while other modules were prioritized; the share data was, in the meantime, living directly on the OS root filesystem. This section closes that gap.
 
-> **Prerequisite note:** an earlier session identified a VirtualBox timer-stall issue tied to the Paravirtualization Interface setting (KVM causing RCU stalls on this AMD host). That was resolved by switching the interface to **Minimal** under VM Settings → System → Acceleration, prior to the work in this document.
+> **Note:** an earlier session identified a VirtualBox timer-stall issue tied to the Paravirtualization Interface setting (KVM causing RCU stalls on this AMD host). That was resolved by switching the interface to **Minimal** under VM Settings → System → Acceleration, prior to the work in this document.
 
 ### Building the LVM Stack
 
@@ -33,7 +33,7 @@ sudo vgcreate mednet-data-vg /dev/sdb
 
 ![Volume group created, ~20 GiB available](../screenshots/06-storage-and-quotas_02.png)
 
-The logical volume was deliberately sized at **15 GB**, not the full 20 GB — leaving roughly 5 GB unallocated in the volume group on purpose, to demonstrate live volume growth later in this document rather than requiring a second disk just to prove the concept:
+The logical volume was deliberately sized at **15 GB**, not the full 20 GB, leaving roughly 5 GB unallocated in the volume group on purpose, to demonstrate live volume growth later in this document rather than requiring a second disk just to prove the concept:
 
 ```bash
 sudo lvcreate -L 15G -n samba-data mednet-data-vg
@@ -76,7 +76,7 @@ sudo getfacl /mnt/samba-new/clinical/physicians/intake-form-template.txt
 
 ![rsync migration complete; diff clean aside from lost+found; ACLs verified identical on both copies](../screenshots/06-storage-and-quotas_05.png)
 
-> **Note:** `diff` reported one difference — `lost+found`, a directory `mkfs.ext4` creates automatically on every ext4 filesystem for kernel-level recovery bookkeeping. It's filesystem housekeeping, not share data, and its presence on the new volume (and absence from the comparison baseline) is expected rather than a migration gap.
+> **Note:** `diff` reported one difference: `lost+found`, a directory `mkfs.ext4` creates automatically on every ext4 filesystem for kernel-level recovery bookkeeping. It's filesystem housekeeping, not share data, and its presence on the new volume (and absence from the comparison baseline) is expected rather than a migration gap.
 
 ### Cutover
 
@@ -90,7 +90,7 @@ sudo mkdir -p /srv/samba
 sudo mount /dev/mapper/mednet--data--vg-samba--data /srv/samba
 ```
 
-> **Troubleshooting note — device symlink timing:** the friendly LVM path (`/dev/mednet-data-vg/samba-data`) intermittently failed to mount immediately after unmounting, with the kernel reporting the device didn't exist. This was a udev timing quirk rather than a real fault — cycling the volume group (`vgchange -an` then `vgchange -ay`) forced device-mapper nodes to regenerate cleanly. The permanent fstab entry was written using the filesystem's UUID rather than either device-path style, avoiding the issue going forward.
+> **Note:** The friendly LVM path (`/dev/mednet-data-vg/samba-data`) intermittently failed to mount immediately after unmounting, with the kernel reporting the device didn't exist. This was a udev timing quirk rather than a real fault; cycling the volume group (`vgchange -an` then `vgchange -ay`) forced device-mapper nodes to regenerate cleanly. The permanent fstab entry was written using the filesystem's UUID rather than either device-path style, avoiding the issue going forward.
 
 ```bash
 echo 'UUID=15e46774-443b-49d6-902d-346c1453078c /srv/samba ext4 defaults 0 2' | sudo tee -a /etc/fstab
@@ -101,7 +101,7 @@ sudo mount -a
 
 ![Fstab corrected to a single UUID-based entry; full unmount/remount-all cycle confirms the LVM volume mounts cleanly at /srv/samba](../screenshots/06-storage-and-quotas_06.png)
 
-Samba was then restarted — not just started, to guarantee a clean process boundary after the mount changes:
+Samba was then restarted, not just started, to guarantee a clean process boundary after the mount changes:
 
 ```bash
 sudo systemctl restart smbd nmbd winbind
@@ -148,7 +148,7 @@ sudo quotaon -v /srv/samba
 
 ![grpquota mount option applied; quota database built; group quotas turned on](../screenshots/06-storage-and-quotas_10.png)
 
-> **Design note — legacy vs. native ext4 quota:** both `quotacheck` and `quotaon` warned that external quota files are deprecated on ext4 in favor of the filesystem's native quota feature. An attempt was made to switch to the native method (`tune2fs -O quota`), which failed with `Invalid mount option set: quota` — a mount-option conflict in this environment that wasn't worth extensive detour time to resolve, since the legacy external-file method is still fully functional and widely deployed. The environment was cleanly reverted to the working legacy method rather than left in a half-migrated state:
+> **Note:** Both `quotacheck` and `quotaon` warned that external quota files are deprecated on ext4 in favor of the filesystem's native quota feature. An attempt was made to switch to the native method (`tune2fs -O quota`), which failed with `Invalid mount option set: quota`, a mount-option conflict in this environment that wasn't worth extensive detour time to resolve, since the legacy external-file method is still fully functional and widely deployed. The environment was cleanly reverted to the working legacy method rather than left in a half-migrated state:
 
 ```bash
 sudo mount -a
@@ -161,7 +161,7 @@ sudo systemctl start smbd nmbd winbind
 
 ### Mapping AD Groups to Quota-Trackable Ownership
 
-Group quotas key off a file's **primary group**, not its ACLs. The share structure deliberately keeps every file owned `root:root` with access granted through named ACL entries (per `02-share-structure.md` and `03-permissions-and-acls.md`) — which means, as built, no file's primary group actually matched a department, and a quota on any department group would track nothing.
+Group quotas key off a file's **primary group**, not its ACLs. The share structure deliberately keeps every file owned `root:root` with access granted through named ACL entries (per `02-share-structure.md` and `03-permissions-and-acls.md`), which means, as built, no file's primary group actually matched a department, and a quota on any department group would track nothing.
 
 The fix layers a second mechanism on top without touching the existing one: each department subdirectory's **primary group** was set to its winbind-resolved AD group, with the setgid bit applied so every new file automatically inherits it going forward.
 
@@ -181,11 +181,11 @@ sudo chmod -R g+s /srv/samba/clinical/physicians
 
 The result is two independent layers, each doing one job: **ACLs control who can access a share**; **primary group ownership controls whose quota the files count against**. Neither layer depends on or interferes with the other.
 
-> **Limitation — `clinical/shared-clinical`:** this subdirectory is accessible by three separate clinical groups (`clinical-physicians`, `clinical-nursing`, `clinical-pharmacy`). Linux group quotas can only charge usage against one primary group per file, so there's no clean way to quota a genuinely multi-group folder at the department level. It was deliberately left out of the primary-group reassignment rather than forcing an arbitrary single-group answer — a real constraint of Linux's quota model, not an oversight.
+> **Note:** The `clinical/shared-clinical` subdirectory is accessible by three separate clinical groups (`clinical-physicians`, `clinical-nursing`, `clinical-pharmacy`). Linux group quotas can only charge usage against one primary group per file, so there's no clean way to quota a genuinely multi-group folder at the department level. It was deliberately left out of the primary-group reassignment rather than forcing an arbitrary single-group answer, a real constraint of Linux's quota model, not an oversight.
 
 ### Setting Limits
 
-Limits were differentiated by realistic department storage weight — Clinical carries the heaviest load (records, imaging references), Administrative and IT sit in the middle, and Shared stays intentionally small as a lightweight cross-department space rather than a bulk-storage destination:
+Limits were differentiated by realistic department storage weight: Clinical carries the heaviest load (records, imaging references), Administrative and IT sit in the middle, and Shared stays intentionally small as a lightweight cross-department space rather than a bulk-storage destination:
 
 | Group | Soft Limit | Hard Limit |
 |---|---|---|
@@ -208,21 +208,21 @@ sudo repquota -g /srv/samba
 
 ---
 
-## Quota Enforcement — Tested
+## Quota Enforcement: Tested
 
 To prove the quota system genuinely blocks writes rather than just existing on paper, `admin-reception`'s limit was temporarily lowered and deliberately exceeded.
 
 ### A False Start: Root Bypasses Quota
 
-The first attempt wrote data as `root` (via `sudo su`) and the write succeeded in full, despite a hard limit of only 150 KB. This wasn't a broken quota system — Linux processes running as root carry `CAP_SYS_RESOURCE`, a kernel capability that explicitly exempts root from filesystem quota checks. It's expected, documented behavior, but it meant the first test wasn't actually testing enforcement:
+The first attempt wrote data as `root` (via `sudo su`) and the write succeeded in full, despite a hard limit of only 150 KB. This wasn't a broken quota system: Linux processes running as root carry `CAP_SYS_RESOURCE`, a kernel capability that explicitly exempts root from filesystem quota checks. It's expected, documented behavior, but it meant the first test wasn't actually testing enforcement:
 
-![Write completed in full as root, despite a 150 KB hard limit — the quota bypass in action](../screenshots/06-storage-and-quotas_15.png)
+![Write completed in full as root, despite a 150 KB hard limit, showing the quota bypass in action](../screenshots/06-storage-and-quotas_15.png)
 
 The test was corrected to run as a genuine non-root user (`sudo -u sysadmin -g admin-reception ...`), which is what a real department staff member's write would look like.
 
 ### Enforcement Confirmed
 
-The corrected first write actually succeeded too — but the reason turned out to be informative rather than a failure of the setup: the legacy external-quota-file method enforces at **writeback** time, not at the moment `write()` is called, so a buffered write can complete before the kernel's quota check catches up. This is precisely the behavior the earlier deprecation warning was pointing at — the native ext4 quota feature enforces at block-allocation time, which is tighter. Forcing a sync surfaced the over-limit state immediately after:
+The corrected first write actually succeeded too, but the reason turned out to be informative rather than a failure of the setup. The legacy external-quota-file method enforces at **writeback** time, not at the moment `write()` is called, so a buffered write can complete before the kernel's quota check catches up. This is precisely the behavior the earlier deprecation warning was pointing at: the native ext4 quota feature enforces at block-allocation time, which is tighter. Forcing a sync surfaced the over-limit state immediately after:
 
 ```bash
 sync
@@ -236,11 +236,11 @@ The test files were removed and `admin-reception`'s limit restored to its real 5
 
 ---
 
-## Growth Path — Live Volume Extension
+## Growth Path: Live Volume Extension
 
 This is the payoff for the 5 GB deliberately left unallocated when the logical volume was created: LVM allows growing storage without downtime, without unmounting, and without interrupting the running Samba service.
 
-> **Note:** a first attempt at `lvextend -L +5G` failed with *"Insufficient free space: 1280 extents needed, but only 1279 available"* — the volume group's true free space was fractionally under 5 GB due to LVM's own metadata reservation. Rather than calculate the exact remaining size, `-l +100%FREE` was used instead, which claims whatever is actually available regardless of the precise figure.
+> **Note:** a first attempt at `lvextend -L +5G` failed with *"Insufficient free space: 1280 extents needed, but only 1279 available"*. The volume group's true free space was fractionally under 5 GB due to LVM's own metadata reservation. Rather than calculate the exact remaining size, `-l +100%FREE` was used instead, which claims whatever is actually available regardless of the precise figure.
 
 ```bash
 sudo lvextend -l +100%FREE /dev/mapper/mednet--data--vg-samba--data
@@ -249,7 +249,7 @@ sudo resize2fs /dev/mapper/mednet--data--vg-samba--data
 
 ![Logical volume grown from 15 GiB to ~20 GiB and the filesystem resized online; /srv/samba now shows ~20 GB total; smbd's uptime is unbroken across the entire operation](../screenshots/06-storage-and-quotas_17.png)
 
-`resize2fs` explicitly confirmed this was an **online** resize — filesystem mounted, Samba actively running — and `smbd`'s process uptime carried through the entire operation without a restart. This is the concrete argument for LVM over a fixed partition: a department outgrowing its share doesn't require scheduled downtime to fix.
+`resize2fs` explicitly confirmed this was an **online** resize (filesystem mounted, Samba actively running), and `smbd`'s process uptime carried through the entire operation without a restart. This is the concrete argument for LVM over a fixed partition: a department outgrowing its share doesn't require scheduled downtime to fix.
 
 ---
 
@@ -262,8 +262,8 @@ Quota usage and volume capacity are worth alerting on before they become a hard 
 ## Limitations & Production Considerations
 
 - **`clinical/shared-clinical` has no clean quota owner.** As noted above, Linux group quotas track one primary group per file, and this folder is genuinely multi-group by design. A production system might address this with project quotas (XFS) or application-level storage tracking instead of relying on the Linux group-quota primitive.
-- **Legacy quota method, not native ext4 quota.** The native feature was attempted and reverted after a mount-option conflict. The legacy method is fully functional and widely used, but enforces at writeback rather than at write time — a real, if narrow, timing gap that the native method closes.
-- **Block quotas only, not inode quotas.** Limits were set on space consumed (`0 0` for the inode fields), not file count. For this share's usage pattern — documents, forms, records — space is the meaningful constraint; a share expecting very large numbers of tiny files might want inode limits too.
+- **Legacy quota method, not native ext4 quota.** The native feature was attempted and reverted after a mount-option conflict. The legacy method is fully functional and widely used, but enforces at writeback rather than at write time, a real, if narrow, timing gap that the native method closes.
+- **Block quotas only, not inode quotas.** Limits were set on space consumed (`0 0` for the inode fields), not file count. For this share's usage pattern (documents, forms, records), space is the meaningful constraint; a share expecting very large numbers of tiny files might want inode limits too.
 - **No automated capacity alerting yet.** `repquota` and `df` show current state on demand, but nothing currently pages an administrator as a group approaches its limit. See the Monitoring Pointer above.
 
 ---
@@ -278,4 +278,4 @@ Quota usage and volume capacity are worth alerting on before they become a hard 
 
 ---
 
-*Part of the [MedNet Enterprise Lab](../../README.md) — Enterprise Healthcare IT Infrastructure & Security Operations Home Lab*
+*Part of the [MedNet Enterprise Lab](../README.md), an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
