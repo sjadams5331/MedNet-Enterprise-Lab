@@ -151,4 +151,4 @@ The following hardening measures are planned for later phases of the lab:
 
 ---
 
-*Part of [MedNet Active Directory](../README.md), a module in the [MedNet Enterprise Lab](../../README.md).*
+*Part of the [MedNet Enterprise Lab](../README.md), an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
