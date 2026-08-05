@@ -218,10 +218,12 @@ In the current model, the `Clinical` share admits all three clinical groups with
 
 | Document | Description |
 |---|---|
-| [01-ad-integration.md](01-ad-integration.md) | Domain join, Kerberos authentication, and AD identity resolution |
-| [02-share-structure.md](02-share-structure.md) | Share layout and the share-level `valid users` gate |
-| [04-security-hardening.md](04-security-hardening.md) | SMB signing, protocol hardening, interface binding, firewall, SSH |
-| [MedNet-ActiveDirectory/01-domain-design.md](../../01-MedNet-ActiveDirectory/docs/01-domain-design.md) | AD security groups and user accounts |
+| [01-ad-integration.md](docs/01-ad-integration.md) | Domain join, Kerberos authentication, and AD identity resolution |
+| [02-share-structure.md](docs/02-share-structure.md) | Share layout, on-disk structure, and `smb.conf` share definitions |
+| [04-security-hardening.md](docs/04-security-hardening.md) | SMB signing, protocol hardening, firewall, and SSH hardening |
+| [05-backup-and-recovery.md](docs/05-backup-and-recovery.md) | Backup method, retention, and a tested restore |
+| [06-storage-and-quotas.md](docs/06-storage-and-quotas.md) | LVM storage layout and per-department disk quotas |
+| [MedNet-ActiveDirectory/01-domain-design.md](../../01-MedNet-ActiveDirectory/docs/01-domain-design.md) | AD OU structure, security groups, and user accounts |
 
 ---
 
