@@ -7,9 +7,9 @@
 
 ## Overview
 
-`mednet-fs01` is a headless Debian 12 server running Samba as a domain member of `mednet.lab`. Rather than maintaining its own user database, it authenticates staff against Active Directory over Kerberos and enforces access through AD security groups — the same identities used everywhere else in the lab. Department shares are presented as four category shares (Clinical, Administrative, IT, Shared), each admitting only the AD groups appropriate to it.
+`mednet-fs01` is a headless Debian 12 server running Samba as a domain member of `mednet.lab`. Rather than maintaining its own user database, it authenticates staff against Active Directory over Kerberos and enforces access through AD security groups, the same identities used everywhere else in the lab. Department shares are presented as four category shares (Clinical, Administrative, IT, Shared), each admitting only the AD groups appropriate to it.
 
-This VM is part of the broader **MedNet Enterprise Lab** — a simulated hospital IT infrastructure built for portfolio and skills-development purposes.
+This VM is part of the broader **MedNet Enterprise Lab**, a simulated hospital IT infrastructure built for portfolio and skills-development purposes.
 
 ---
 
@@ -20,9 +20,9 @@ This VM is part of the broader **MedNet Enterprise Lab** — a simulated hospita
 | Hostname | `mednet-fs01` |
 | FQDN | `mednet-fs01.mednet.lab` |
 | IP Address | `192.168.56.20` |
-| Operating System | Debian 12 (Bookworm) — Headless Server |
+| Operating System | Debian 12 (Bookworm), Headless Server |
 | Domain | `mednet.lab` |
-| Role | Samba File Server — Domain Member |
+| Role | Samba File Server, Domain Member |
 | Samba Version | 4.17.12-Debian |
 
 ---
@@ -43,7 +43,7 @@ The following lab components must be running and reachable before this server is
 
 ## Architecture
 
-The file server participates as a standard domain member — not a domain controller. Authentication happens on the server itself via Kerberos, and AD users and groups are resolved through winbind. Access to each share is determined by AD group membership, so permissions are managed centrally in Active Directory rather than locally on the server.
+The file server participates as a standard domain member, not a domain controller. Authentication happens on the server itself via Kerberos, and AD users and groups are resolved through winbind. Access to each share is determined by AD group membership, so permissions are managed centrally in Active Directory rather than locally on the server.
 
 ```
    AD Domain Controller                 File Server (domain member)
@@ -66,12 +66,12 @@ Four department-category shares are served, each gated by the AD security groups
 
 | Share | Scope | AD Groups Permitted | On-disk Path |
 |---|---|---|---|
-| `Clinical` | Clinical — PHI (Restricted) | `Clinical-Physicians`, `Clinical-Nursing`, `Clinical-Pharmacy` | `/srv/samba/clinical` |
+| `Clinical` | Clinical, PHI (Restricted) | `Clinical-Physicians`, `Clinical-Nursing`, `Clinical-Pharmacy` | `/srv/samba/clinical` |
 | `Administrative` | Administrative (Restricted) | `Admin-HR`, `Admin-Finance`, `Admin-Reception` | `/srv/samba/administrative` |
 | `IT` | IT Department (Restricted) | `IT-Staff` | `/srv/samba/it` |
 | `Shared` | Hospital-wide Shared Resources | `Domain Users` | `/srv/samba/shared` |
 
-Access is enforced in two layers: the share-level `valid users` gate (who may connect) and filesystem POSIX ACLs (what a connected user may read or write). The category boundary is the primary HIPAA minimum-necessary control — staff in one category cannot reach another category's share.
+Access is enforced in two layers: the share-level `valid users` gate (who may connect) and filesystem POSIX ACLs (what a connected user may read or write). The category boundary is the primary HIPAA minimum-necessary control: staff in one category cannot reach another category's share.
 
 ---
 
@@ -111,9 +111,11 @@ Access is enforced in two layers: the share-level `valid users` gate (who may co
 |---|---|
 | [01-ad-integration.md](docs/01-ad-integration.md) | Domain join, Kerberos authentication, and AD identity resolution |
 | [02-share-structure.md](docs/02-share-structure.md) | Share layout, on-disk structure, and `smb.conf` share definitions |
-
-*Permissions & ACLs, security hardening, backup & recovery, and storage & quotas are added as each phase is completed.*
+| [03-permissions-and-acls.md](docs/03-permissions-and-acls.md) | POSIX ACLs, group-based read/write control, and the cross-OS access demonstration |
+| [04-security-hardening.md](docs/04-security-hardening.md) | SMB signing, protocol hardening, firewall, and SSH hardening |
+| [05-backup-and-recovery.md](docs/05-backup-and-recovery.md) | Backup method, retention, and a tested restore |
+| [06-storage-and-quotas.md](docs/06-storage-and-quotas.md) | LVM storage layout and per-department disk quotas |
 
 ---
 
-*Part of the [MedNet Enterprise Lab](../README.md) — Enterprise Healthcare IT Infrastructure & Security Operations Home Lab*
+*Part of the [MedNet Enterprise Lab](../README.md), an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
