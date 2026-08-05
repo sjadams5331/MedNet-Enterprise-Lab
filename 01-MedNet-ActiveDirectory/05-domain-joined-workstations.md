@@ -209,4 +209,4 @@ These workstations are the actors for the rest of MedNet. Their provisioning is 
 
 ---
 
-*Part of the MedNet Enterprise Lab, an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
+*Part of the [MedNet Enterprise Lab](../README.md), an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
