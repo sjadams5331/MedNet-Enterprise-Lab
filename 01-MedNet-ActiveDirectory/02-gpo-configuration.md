@@ -171,4 +171,4 @@ Removable-storage access is denied at the endpoint level as a data-loss-preventi
 
 ---
 
-*Part of [MedNet Active Directory](../README.md), a module in the [MedNet Enterprise Lab](../../README.md).*
+*Part of the [MedNet Enterprise Lab](../README.md), an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
