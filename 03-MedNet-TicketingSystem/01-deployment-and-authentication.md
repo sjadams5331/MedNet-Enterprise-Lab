@@ -88,9 +88,9 @@ The interim values entered during installation (helpdesk name, contact email, an
 
 To keep the ticketing platform consistent with the rest of the MedNet environment, the initial installer defaults were updated post-deployment:
 
-- **Helpdesk URL** — updated from the VirtualBox NAT adapter address to the host-only network address, `192.168.56.120` (`itsm01.mednet.lab`)
-- **Helpdesk Name** — updated to reflect MedNet branding
-- **Default System Email** — updated to a `mednet.lab` address
+- **Helpdesk URL** — updated from the VirtualBox NAT adapter address to `http://192.168.56.120/osticket/`, the host-only network address for `itsm01.mednet.lab`
+- **Helpdesk Name/Title** — updated to `MedNet IT Helpdesk`, matching the Company Name set under the Company Profile
+- **Default System Email** — updated to `support@mednet.lab`, alongside supporting addresses `alerts@mednet.lab` and `noreply@mednet.lab`
 
 A DNS A-record for `itsm01.mednet.lab → 192.168.56.120` was added on the domain controller to support hostname-based access, consistent with the alias-record approach already used for `dc01.mednet.lab`.
 
