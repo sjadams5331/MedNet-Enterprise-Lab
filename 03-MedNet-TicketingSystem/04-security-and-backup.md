@@ -76,13 +76,3 @@ One useful side-finding during this test: the `osticket` database user could not
 ### Relationship to the Module 01 snapshot baseline
 
 This is a deliberately different, complementary layer to the VirtualBox snapshot taken at the end of deployment. The snapshot is an infrequent, full-environment rollback point — useful for reverting the whole VM after a bad change, but not something you'd take daily. The `mysqldump` cron job is frequent, granular, and data-only — it protects against losing a day's worth of tickets without needing a full VM-level rollback. Together they cover different failure scenarios rather than duplicating the same protection.
-
-## Phase Completion Summary
-
-- Deployment upgraded to TLS using the existing MedNet-RootCA, with Force HTTPS verified functioning, not just enabled
-- Several real infrastructure gaps found and properly fixed during that work: a missing DNS record, a non-persistent network interface configuration, and a directory permission gap — each documented rather than quietly patched around
-- Agent lockout and session timeout policy configured
-- 2FA evaluated but intentionally left undecided for now, to be revisited separately
-- A tested, working backup and restore cycle in place, with least-privilege database scoping confirmed as a side effect of testing it
-
-This completes the core documentation for the MedNet Ticketing System module.
