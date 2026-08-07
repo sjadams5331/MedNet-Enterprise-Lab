@@ -7,9 +7,9 @@
 
 ## Overview
 
-`itsm01` runs osTicket as the MedNet Enterprise Lab's ITSM platform. Unlike the file server, it is **not domain-joined** — Active Directory integration happens entirely at the application layer, with staff authenticating through osTicket's built-in LDAP plugin over LDAPS rather than through host-level domain membership. This keeps the deployment's scope deliberately narrow: one dependency on AD (staff login), no dependency on a mail server, and no unnecessary attack surface from joining a domain the application doesn't otherwise need.
+`itsm01` runs osTicket as the MedNet Enterprise Lab's ITSM platform. Unlike the file server, it is **not domain-joined**: Active Directory integration happens entirely at the application layer, with staff authenticating through osTicket's built-in LDAP plugin over LDAPS rather than through host-level domain membership. This keeps the deployment's scope deliberately narrow: one dependency on AD (staff login), no dependency on a mail server, and no unnecessary attack surface from joining a domain the application doesn't otherwise need.
 
-The service desk structure reflects the same hospital-context design used throughout the lab. A dedicated Clinical Systems department carries a materially tighter, 24/7 service level agreement than general IT requests — the ticketing system's version of the access-compartmentalization principle used in the file server and AD modules.
+The service desk structure reflects the same hospital-context design used throughout the lab. A dedicated Clinical Systems department carries a materially tighter, 24/7 service level agreement than general IT requests, the ticketing system's version of the access-compartmentalization principle used in the file server and AD modules.
 
 This module also documents its own troubleshooting honestly, including several real infrastructure gaps found and fixed during TLS setup (a missing DNS record, a non-persistent network interface, and a directory permission gap) rather than presenting a cleaned-up version of events.
 
@@ -23,7 +23,7 @@ This module also documents its own troubleshooting honestly, including several r
 | FQDN | `itsm01.mednet.lab` |
 | IP Address | `192.168.56.120` |
 | Operating System | Debian 12 (Bookworm), Headless Server |
-| Domain | `mednet.lab` — LDAPS integration only, **not** domain-joined |
+| Domain | `mednet.lab` (LDAPS integration only, **not** domain-joined) |
 | Role | osTicket Helpdesk / ITSM Platform |
 | Application Stack | Apache 2, PHP 8.2, MariaDB |
 | osTicket Version | v1.18.1 |
@@ -38,7 +38,7 @@ This module also documents its own troubleshooting honestly, including several r
 | AD Domain Controller | `dc01.mednet.lab` at `192.168.56.10` |
 | Domain | `mednet.lab`, LDAPS reachable on port 636 |
 | Internal CA | `MedNet-RootCA`, used for both LDAPS trust and the TLS certificate issued to `itsm01` |
-| LDAP Bind Account | `svc_osticket@mednet.lab` — dedicated, least-privilege, search/bind only |
+| LDAP Bind Account | `svc_osticket@mednet.lab` (dedicated, least-privilege, search/bind only) |
 | VirtualBox Host-Only Network | Shared with all lab VMs on `192.168.56.0/24` |
 
 ---
@@ -50,7 +50,7 @@ This module also documents its own troubleshooting honestly, including several r
    dc01.mednet.lab                          itsm01.mednet.lab
    192.168.56.10                            192.168.56.120
         │                                          │
-        │   LDAPS (636) — svc_osticket bind        │
+        │   LDAPS (636), svc_osticket bind         │
         └──────────────────────────────────────────┘
                              │
         Staff authenticate via AD; the public portal is locally managed
@@ -68,10 +68,10 @@ Staff authentication is delegated to Active Directory; the client-facing support
 
 | Department | Type | Agent | SLA |
 |---|---|---|---|
-| Help Desk (default) | Public | Samuel Adams (`s.adams`) | Standard Support SLA — 24hr, business hours |
-| Network & Infrastructure | Public | Alex Turner (`a.turner`) | Standard Support SLA — 24hr, business hours |
-| Clinical Systems | Public | Mike Reyes | Clinical Systems SLA — 4hr, 24/7 |
-| Admins | Private | Local break-glass account | — |
+| Help Desk (default) | Public | Samuel Adams (`s.adams`) | Standard Support SLA (24hr, business hours) |
+| Network & Infrastructure | Public | Alex Turner (`a.turner`) | Standard Support SLA (24hr, business hours) |
+| Clinical Systems | Public | Mike Reyes | Clinical Systems SLA (4hr, 24/7) |
+| Admins | Private | Local break-glass account | N/A |
 
 Five Help Topics route client-submitted tickets to the correct department automatically, and cross-department escalation (tested end to end, including an SLA correction caught by that testing) is documented in `03-ticket-workflows.md`.
 
