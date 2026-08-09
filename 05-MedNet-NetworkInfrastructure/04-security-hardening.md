@@ -4,6 +4,8 @@
 
 This document covers the hardening decisions applied on top of the base firewall and VLAN configuration described in `02-firewall-and-routing-configuration.md` and `03-vlan-and-inter-vlan-routing.md`. In keeping with this repository's documentation philosophy, items here are split plainly into what is implemented and verified today versus what is deliberately deferred, along with the reasoning behind each decision.
 
+---
+
 ## Implemented
 
 ### Lateral Movement Blocking (Clinical &harr; Admin)
@@ -30,9 +32,13 @@ The domain controller and file server previously shared LAN's stock default-allo
 
 Unlike the client VLANs, LAN does not need explicit allow rules for the DC or file server themselves, since most traffic to those hosts is inbound, initiated by other segments, and handled automatically by pfSense's state table. The block rule can therefore sit first in the list rather than needing specific allows placed above it.
 
+![LAN outbound rule set showing the RFC1918 block followed by the four scoped pass rules](../screenshots/04-security-hardening_01.png)
+
 **A pre-existing issue surfaced during testing, unrelated to this change:** the domain controller's configured DNS forwarders (`192.168.1.1`, `43.168.1.1`) were not genuinely reachable addresses, likely stray values auto-populated at some point and never corrected. External DNS resolution had almost certainly been broken since before this hardening pass began; it simply had never been tested until this rule set required verifying outbound DNS explicitly. Corrected via `Set-DnsServerForwarder` to known-reachable public resolvers. Documented here rather than in the routing doc since it was discovered as a direct result of hardening verification, not the VLAN migration work itself.
 
 Each of the four pass rules (HTTPS, DNS via raw port and via the corrected forwarder, NTP) was independently tested and confirmed working post-change, along with a check that core AD services (DNS, Netlogon, NTDS) remained healthy.
+
+![DNS Manager forwarders tab showing the corrected, reachable public resolvers](../screenshots/04-security-hardening_02.png)
 
 ### pfSense Administrative Access
 
@@ -43,11 +49,17 @@ Several settings under System &rarr; Advanced &rarr; Admin Access were reviewed 
 - **Login protection:** confirmed active, using pfSense's built-in defaults (threshold 30, initial blocktime 120 seconds with 1.5x escalation on repeat offenses, 30-minute detection window). This applies to both the web GUI and SSH. No addresses were added to the pass list; trusted management hosts are deliberately not exempted, since those are exactly the hosts most valuable to an attacker attempting credential-based lateral movement.
 - **SSH:** enabled deliberately, in anticipation of Module 08's planned Ansible-based configuration management, rather than left on its off-by-default state indefinitely. Authentication is restricted to public-key only (SSHd Key Only set to "Public Key Only"); password-based SSH login is disabled entirely. A dedicated Ed25519 keypair was generated on WS-IT-01, the environment's designated jump host, and its public key added to the pfSense `admin` account. End-to-end key-based login was verified from WS-IT-01 before switching off password authentication, avoiding a lockout scenario (SSH is not covered by pfSense's LAN Anti-Lockout Rule, unlike the web GUI).
 
+![pfSense Admin Access settings showing HTTPS-only, disabled autocomplete, and active login protection](../screenshots/04-security-hardening_03.png)
+
 ### CA-Signed Administrative Certificate
 
 The pfSense GUI previously used its default self-signed certificate. A certificate signing request was generated on pfSense (private key never leaving the appliance) with Common Name `pfsense.mednet.lab`, then signed by `MedNet-RootCA` on the domain controller using the WebServer certificate template, tying this module's PKI trust back to the Active Directory Certificate Services work established in `01-MedNet-ActiveDirectory`. The signed certificate was imported and assigned as the GUI's active certificate, and a corresponding DNS A record was created, consistent with the `dc01`/`itsm01` alias pattern used elsewhere in the environment.
 
 Browsing to `https://pfsense.mednet.lab` from a domain-joined host now resolves without a certificate warning, since those machines trust `MedNet-RootCA` automatically via Group Policy. Non-domain-joined hosts (WS-IT-01, the hypervisor host itself) continue to show an untrusted-certificate warning unless the root CA certificate is separately imported into their trust stores; this is noted as a known, low-priority gap rather than a defect, since administrative access to the GUI from those hosts is a secondary path, not the primary one.
+
+![Browser showing a valid, CA-trusted padlock for https://pfsense.mednet.lab on a domain-joined host](../screenshots/04-security-hardening_04.png)
+
+---
 
 ## Deferred
 
@@ -69,12 +81,17 @@ The pfSense `admin` account retains its default name. Renaming or replacing it w
 
 WS-IT-01 (Ubuntu, not domain-joined) and the hypervisor host itself do not trust `MedNet-RootCA`, so the pfSense GUI's now-valid certificate still presents as untrusted from those machines. Manually importing the CA certificate into their respective trust stores would resolve this. Deferred as low priority, since these are secondary access paths to the GUI, not the primary one.
 
+---
+
 ## Related Documents
 
 | Document | Description |
 |---|---|
+| [README.md](README.md) | Network Infrastructure module overview and documentation index |
 | [01-network-segmentation-design.md](01-network-segmentation-design.md) | VLAN architecture rationale and subnet design |
 | [02-firewall-and-routing-configuration.md](02-firewall-and-routing-configuration.md) | Interface and firewall rule configuration |
 | [03-vlan-and-inter-vlan-routing.md](03-vlan-and-inter-vlan-routing.md) | Host migration, inter-VLAN routing verification, and troubleshooting |
 
-*Part of the MedNet Enterprise Lab*
+---
+
+*Part of the [MedNet Enterprise Lab](../README.md), an Enterprise Healthcare IT Infrastructure & Security Operations home lab.*
